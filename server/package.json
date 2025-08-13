@@ -1,0 +1,18 @@
+{
+    "name": "gedcom-language-server",
+    "version": "1.0.0",
+    "description": "Language Server for GEDCOM validation",
+    "main": "out/server.js",
+    "scripts": {
+        "compile": "tsc",
+        "watch": "tsc -w"
+    },
+    "dependencies": {
+        "vscode-languageserver": "^8.1.0",
+        "vscode-languageserver-textdocument": "^1.0.8"
+    },
+    "devDependencies": {
+        "@types/node": "^16.11.7",
+        "typescript": "^4.5.5"
+    }
+} 

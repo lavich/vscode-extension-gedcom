@@ -1,0 +1,80 @@
+{
+  "name": "vscode-extention-gedcom",
+  "displayName": "GEDCOM Validator",
+  "description": "VS Code extension for GEDCOM file validation with real-time syntax checking",
+  "author": "Your Name",
+  "license": "MIT",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lavich/vscode-extention-gedcom"
+  },
+  "publisher": "your-publisher-name",
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "gedcom",
+    "genealogy",
+    "validation",
+    "syntax"
+  ],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "activationEvents": [
+    "onLanguage:gedcom"
+  ],
+  "main": "./client/out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "gedcom",
+        "aliases": [
+          "GEDCOM",
+          "gedcom"
+        ],
+        "extensions": [
+          ".ged",
+          ".gedcom"
+        ],
+        "configuration": "./client/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "gedcom",
+        "scopeName": "source.gedcom",
+        "path": "./client/syntaxes/gedcom.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "npm run compile:client && npm run compile:server",
+    "compile:client": "cd client && npm run compile",
+    "compile:server": "cd server && npm run compile",
+    "watch": "npm run watch:client & npm run watch:server",
+    "watch:client": "cd client && npm run watch",
+    "watch:server": "cd server && npm run watch",
+    "lint": "eslint",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
+    "test": "sh ./scripts/e2e.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@stylistic/eslint-plugin": "^2.9.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20",
+    "eslint": "^9.13.0",
+    "mocha": "^10.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.26.0",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "ts-brand": "^0.2.0"
+  }
+}
