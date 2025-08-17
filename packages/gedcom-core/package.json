@@ -1,0 +1,11 @@
+{
+  "name": "gedcom-core",
+  "version": "1.0.0",
+  "description": "Language Server for GEDCOM validation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p ."
+  }
+}

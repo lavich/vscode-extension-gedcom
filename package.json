@@ -17,30 +17,21 @@
     "compile": "npm run compile:client && npm run compile:server",
     "compile:client": "cd client && npm run compile",
     "compile:server": "cd server && npm run compile",
-    "watch": "npm run watch:client & npm run watch:server",
-    "watch:client": "cd client && npm run watch",
-    "watch:server": "cd server && npm run watch",
-    "watch:new": "npm run watch:client & npm run watch:server",
-    "watch:vscode": "npm run watch -w packages/gedcom-vscode",
+    "watch": "npm run watch:core & npm run watch:lsp & npm run watch:vscode",
+    "watch:core": "npm run watch -w packages/gedcom-core",
     "watch:lsp": "npm run watch -w packages/gedcom-lsp",
+    "watch:vscode": "npm run watch -w packages/gedcom-vscode",
     "open:code": "code --extensionDevelopmentPath=$PWD/packages/gedcom-vscode test.ged",
-    "lint": "eslint",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-    "test": "sh ./scripts/e2e.sh"
+    "lint": "eslint"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@stylistic/eslint-plugin": "^2.9.0",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "^20",
+    "@types/node": "^24.3.0",
     "eslint": "^9.13.0",
     "mocha": "^10.3.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.26.0",
-    "vitest": "^3.2.4"
-  },
-  "dependencies": {
-    "ts-brand": "^0.2.0"
+    "typescript-eslint": "^8.39.1"
   }
 }

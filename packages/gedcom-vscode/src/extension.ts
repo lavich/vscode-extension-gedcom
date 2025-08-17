@@ -17,7 +17,7 @@ export function activate(context: ExtensionContext) {
 
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
-    path.join("..", "gedcom-lsp", "out", "server.js"),
+    path.join("..", "gedcom-lsp", "dist", "server.js"),
   );
   console.log(serverModule);
 
