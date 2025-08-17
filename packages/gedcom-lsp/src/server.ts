@@ -14,7 +14,11 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { ASTNode, parseGedcom } from "gedcom-core";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
-import { InlayHintKind, InlayHintParams } from "vscode-languageserver";
+import {
+  FoldingRange,
+  InlayHintKind,
+  InlayHintParams,
+} from "vscode-languageserver";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -24,6 +28,7 @@ connection.onInitialize(() => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       inlayHintProvider: true,
+      foldingRangeProvider: true,
     },
   } satisfies InitializeResult;
 });
@@ -54,6 +59,34 @@ connection.languages.inlayHint.on(
     return ast.nodes.flatMap(addLevelHint);
   },
 );
+
+connection.onFoldingRanges((params): FoldingRange[] => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) return [];
+
+  const ast = parseGedcom(doc.getText());
+
+  const ranges: FoldingRange[] = [];
+
+  const addFolding = (node: ASTNode): void => {
+    if (node.children.length > 0) {
+      const startLine = node.line;
+      const endLine = Math.max(...node.children.map((c) => getEndLine(c)));
+      ranges.push({ startLine, endLine });
+    }
+
+    node.children.forEach(addFolding);
+  };
+
+  const getEndLine = (node: ASTNode): number => {
+    if (node.children.length === 0) return node.line;
+    return Math.max(...node.children.map(getEndLine));
+  };
+
+  ast.nodes.forEach(addFolding);
+
+  return ranges;
+});
 
 documents.onDidChangeContent((change) => {
   validateTextDocument(change.document);
