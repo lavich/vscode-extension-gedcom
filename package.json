@@ -9,47 +9,9 @@
     "type": "git",
     "url": "https://github.com/lavich/vscode-extention-gedcom"
   },
-  "publisher": "your-publisher-name",
-  "categories": [
-    "Programming Languages",
-    "Other"
+  "workspaces": [
+    "packages/*"
   ],
-  "keywords": [
-    "gedcom",
-    "genealogy",
-    "validation",
-    "syntax"
-  ],
-  "engines": {
-    "vscode": "^1.75.0"
-  },
-  "activationEvents": [
-    "onLanguage:gedcom"
-  ],
-  "main": "./client/out/extension.js",
-  "contributes": {
-    "languages": [
-      {
-        "id": "gedcom",
-        "aliases": [
-          "GEDCOM",
-          "gedcom"
-        ],
-        "extensions": [
-          ".ged",
-          ".gedcom"
-        ],
-        "configuration": "./client/language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "gedcom",
-        "scopeName": "source.gedcom",
-        "path": "./client/syntaxes/gedcom.tmLanguage.json"
-      }
-    ]
-  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "npm run compile:client && npm run compile:server",
@@ -58,6 +20,10 @@
     "watch": "npm run watch:client & npm run watch:server",
     "watch:client": "cd client && npm run watch",
     "watch:server": "cd server && npm run watch",
+    "watch:new": "npm run watch:client & npm run watch:server",
+    "watch:vscode": "npm run watch -w packages/gedcom-vscode",
+    "watch:lsp": "npm run watch -w packages/gedcom-lsp",
+    "open:code": "code --extensionDevelopmentPath=$PWD/packages/gedcom-vscode test.ged",
     "lint": "eslint",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
     "test": "sh ./scripts/e2e.sh"

@@ -17,8 +17,9 @@ export function activate(context: ExtensionContext) {
 
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
-    path.join("server", "out", "server.js"),
+    path.join("..", "gedcom-lsp", "out", "server.js"),
   );
+  console.log(serverModule);
 
   // The debug options for the server
   const debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };

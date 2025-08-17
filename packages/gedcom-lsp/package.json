@@ -1,5 +1,5 @@
 {
-    "name": "gedcom-language-server",
+    "name": "gedcom-lsp",
     "version": "1.0.0",
     "description": "Language Server for GEDCOM validation",
     "main": "out/server.js",
