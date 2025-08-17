@@ -21,11 +21,14 @@ export interface ValidationError {
 }
 
 export interface ASTNode {
+  // GEDCOM level
   level: number;
+  // GEDCOM Tag
   tag: string;
   pointer?: string; // e.g. @I1@
   value?: string; // rest of line after tag
   children: ASTNode[];
   range: Range; // covers the entire line for this node
+  // document line
   line: number; // convenience: start line
 }

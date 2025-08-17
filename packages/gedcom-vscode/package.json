@@ -4,12 +4,12 @@
   "description": "GEDCOM file language support with real-time validation for VS Code",
   "version": "0.0.5",
   "preview": true,
-  "main": "./dist/extension.js",
+  "main": "dist/extension.js",
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
-    "open": "code --extensionDevelopmentPath=$PW"
+    "open": "code --extensionDevelopmentPath=$PWD"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
