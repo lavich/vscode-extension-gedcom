@@ -1,18 +1,7 @@
 {
-    "autoClosingPairs": [
-        [
-            "@",
-            "@"
-        ]
-    ],
-    "surroundingPairs": [
-        [
-            "@",
-            "@"
-        ],
-        [
-            "/",
-            "/"
-        ]
-    ]
+  "autoClosingPairs": [["@", "@"]],
+  "surroundingPairs": [
+    ["@", "@"],
+    ["/", "/"]
+  ]
 }

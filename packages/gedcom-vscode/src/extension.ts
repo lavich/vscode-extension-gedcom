@@ -11,15 +11,11 @@ let client: LanguageClient;
 
 console.log("GEDCOM extension module loaded");
 
-export function activate(context: ExtensionContext) {
-  console.log("GEDCOM extension is now active!");
-  console.log("Extension context:", context.extensionPath);
-
+export async function activate(context: ExtensionContext) {
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
     path.join("..", "gedcom-lsp", "dist", "server.js"),
   );
-  console.log(serverModule);
 
   // The debug options for the server
   const debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
@@ -54,7 +50,7 @@ export function activate(context: ExtensionContext) {
   );
 
   // Start the client. This will also launch the server
-  client.start();
+  await client.start();
 
   // Register command for manual validation
   let disposable = commands.registerCommand("gedcom.validate", () => {
@@ -73,9 +69,5 @@ export function activate(context: ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-    return undefined;
-  }
-  console.log("GEDCOM extension is now deactivated!");
-  return client.stop();
+  return client?.stop();
 }

@@ -8,22 +8,16 @@ import {
   TextDocuments,
   Diagnostic,
   ProposedFeatures,
-  InitializeParams,
   TextDocumentSyncKind,
 } from "vscode-languageserver/node";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { parseGedcom } from "gedcom-core";
 
-// Create a connection for the server. The connection uses Node's IPC as a transport.
-// Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
-
 const documents = new TextDocuments(TextDocument);
 
-connection.onInitialize((params: InitializeParams) => {
-  const capabilities = params.capabilities;
-
+connection.onInitialize(() => {
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -32,7 +26,7 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 documents.onDidChangeContent((change) => {
-  void validateTextDocument(change.document);
+  validateTextDocument(change.document);
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
@@ -57,13 +51,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     });
   });
 
-  // Send the computed diagnostics to VSCode.
   await connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
-// Make the text document manager listen on the connection
-// for open, change and close text document events
 documents.listen(connection);
-
-// Listen on the connection
 connection.listen();
