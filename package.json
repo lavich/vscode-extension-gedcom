@@ -22,7 +22,7 @@
     "watch:core": "npm run watch -w packages/gedcom-core",
     "watch:lsp": "npm run watch -w packages/gedcom-lsp",
     "watch:vscode": "npm run watch -w packages/gedcom-vscode",
-    "open:code": "code --extensionDevelopmentPath=$PWD/packages/gedcom-vscode test.ged",
+    "open:code": "code --extensionDevelopmentPath=$PWD/packages/gedcom-vscode",
     "lint": "eslint"
   },
   "devDependencies": {
