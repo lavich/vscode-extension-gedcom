@@ -16,6 +16,8 @@ import { parseGedcom, levelHint, levelFolding } from "gedcom-core";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { FoldingRange, InlayHintParams } from "vscode-languageserver";
 import { validator } from "gedcom-validator";
+import { buildSemanticTokens, legend } from "./semanticTokens";
+import { lex } from "gedcom-core/dist/lexer";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -26,6 +28,11 @@ connection.onInitialize(() => {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       inlayHintProvider: true,
       foldingRangeProvider: true,
+      semanticTokensProvider: {
+        legend,
+        range: false, // поддержка SemanticTokens по диапазону
+        full: true, // поддержка SemanticTokens для всего документа
+      },
     },
   } satisfies InitializeResult;
 });
@@ -42,6 +49,14 @@ connection.onFoldingRanges((params): FoldingRange[] => {
   if (!doc) return [];
   const { nodes } = parseGedcom(doc.getText());
   return levelFolding(nodes);
+});
+
+connection.languages.semanticTokens.on((params) => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) return { data: [] };
+
+  const ast = lex(doc.getText());
+  return buildSemanticTokens(ast.perLine);
 });
 
 documents.onDidChangeContent((change) => {

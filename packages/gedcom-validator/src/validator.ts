@@ -19,7 +19,7 @@ function parseCardinality(str: string): { min: number; max: number } | null {
 
 export function validator(
   nodes: ASTNode[],
-  parentType: GedcomType | string,
+  parentType: GedcomType | string
 ): ValidationError[] {
   const substructure = g7validation.substructure[GedcomType(parentType)];
   if (!substructure) return [];
