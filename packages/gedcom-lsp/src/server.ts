@@ -15,6 +15,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { parseGedcom, levelHint, levelFolding } from "gedcom-core";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { FoldingRange, InlayHintParams } from "vscode-languageserver";
+import { validator } from "gedcom-validator";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -50,9 +51,10 @@ documents.onDidChangeContent((change) => {
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const text = textDocument.getText();
   const diagnostics: Diagnostic[] = [];
-  const { errors } = parseGedcom(text);
+  const { errors, nodes } = parseGedcom(text);
+  const err = validator(nodes, "");
 
-  errors.forEach((error) => {
+  [...errors, ...err].forEach((error) => {
     diagnostics.push({
       code: error.code,
       message: error.message,

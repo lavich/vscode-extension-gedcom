@@ -1,5 +1,5 @@
 {
-  "name": "gedcom-core",
+  "name": "gedcom-validator",
   "version": "1.0.0",
   "description": "Language Server for GEDCOM validation",
   "main": "dist/index.js",
@@ -8,10 +8,8 @@
     "compile": "tsc -d -p .",
     "watch": "tsc -watch -d -p ."
   },
-  "dependencies": {
-    "gedcom-scheme": "*"
-  },
   "devDependencies": {
+    "ts-brand": "^0.2.0",
     "vitest": "^3.2.4"
   }
 }

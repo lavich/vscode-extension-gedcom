@@ -1,6 +1,4 @@
 // parser.ts
-// Single-pass stack-based GEDCOM parser producing AST with ranges and pointer index.
-
 import { lex } from "./lexer";
 import type { Token } from "./lexer";
 import type { ASTNode, ValidationError, Range } from "./types";
@@ -9,26 +7,58 @@ function rangeFromTokens(first: Token, last: Token): Range {
   return { start: first.start, end: last.end };
 }
 
-export function parseGedcom(text: string): {
+function attachNode(stack: ASTNode[], root: ASTNode[], node: ASTNode) {
+  while (stack.length > 0 && stack[stack.length - 1].level >= node.level) {
+    stack.pop();
+  }
+
+  if (stack.length === 0) {
+    root.push(node);
+  } else {
+    stack[stack.length - 1].children.push(node);
+  }
+
+  stack.push(node);
+}
+
+export interface ParseResult {
   nodes: ASTNode[];
   errors: ValidationError[];
   pointerIndex: Map<string, ASTNode>;
-} {
+}
+
+export function parseGedcom(text: string): ParseResult {
   const { perLine, errors: lexErrors } = lex(text);
   const nodes: ASTNode[] = [];
   const stack: ASTNode[] = [];
-  const errors: ValidationError[] = [...lexErrors];
   const pointerIndex = new Map<string, ASTNode>();
 
   for (const { line, tokens } of perLine) {
-    if (tokens.length === 0) continue; // empty line
+    if (tokens.length === 0) continue;
 
-    const levelTok = tokens.find((t) => t.type === "LEVEL");
-    const tagTok = tokens.find((t) => t.type === "TAG");
-    const ptrTok = tokens.find((t) => t.type === "POINTER");
-    const valTok = tokens.find((t) => t.type === "VALUE");
+    let levelTok: Token | undefined;
+    let tagTok: Token | undefined;
+    let ptrTok: Token | undefined;
+    let valTok: Token | undefined;
 
-    if (!levelTok || !tagTok) continue; // lexer already produced an error
+    for (const t of tokens) {
+      switch (t.type) {
+        case "LEVEL":
+          levelTok = t;
+          break;
+        case "TAG":
+          tagTok = t;
+          break;
+        case "POINTER":
+          ptrTok = t;
+          break;
+        case "VALUE":
+          valTok = t;
+          break;
+      }
+    }
+
+    if (!levelTok || !tagTok) continue;
 
     const level = parseInt(levelTok.value, 10);
 
@@ -42,45 +72,12 @@ export function parseGedcom(text: string): {
       line,
     };
 
-    // Level jump check
-    if (stack.length > 0) {
-      const parent = stack[stack.length - 1];
-      if (node.level > parent.level + 1) {
-        errors.push({
-          code: "GEDCOM006",
-          message: `Level jump from ${parent.level} to ${node.level}`,
-          range: {
-            start: levelTok.start,
-            end: levelTok.end,
-          },
-        });
-      }
-    }
-
-    // Attach to AST using stack
-    while (stack.length > 0 && stack[stack.length - 1].level >= node.level) {
-      stack.pop();
-    }
-
-    if (stack.length === 0) {
-      nodes.push(node);
-    } else {
-      stack[stack.length - 1].children.push(node);
-    }
-
-    stack.push(node);
+    attachNode(stack, nodes, node);
 
     if (node.pointer) {
       pointerIndex.set(node.pointer, node);
     }
   }
 
-  return { nodes, errors, pointerIndex };
-}
-
-export function findNodeByPointer(
-  pointerIndex: Map<string, ASTNode>,
-  id: string,
-): ASTNode | undefined {
-  return pointerIndex.get(id);
+  return { nodes, errors: [...lexErrors], pointerIndex };
 }

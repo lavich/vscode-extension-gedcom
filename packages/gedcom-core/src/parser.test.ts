@@ -1,6 +1,6 @@
 // tests/parser.test.ts
 import { describe, it, expect } from "vitest";
-import { parseGedcom, findNodeByPointer } from "./parser";
+import { parseGedcom } from "./parser";
 
 const SAMPLE = `0 @I1@ INDI
 1 NAME John /Doe/
@@ -14,18 +14,10 @@ describe("parser", () => {
     const { nodes, errors, pointerIndex } = parseGedcom(SAMPLE);
     expect(errors.length).toBe(0);
     expect(nodes.length).toBe(2);
-    const n1 = findNodeByPointer(pointerIndex, "@I1@");
+    const n1 = pointerIndex.get("@I1@");
     expect(n1).toBeDefined();
     expect(n1!.tag).toBe("INDI");
     expect(n1!.children.length).toBeGreaterThan(0);
-  });
-
-  it("detects level jumps", () => {
-    const text = `0 @I1@ INDI\n1 NAME John\n3 NOTE bad level`;
-    const { errors } = parseGedcom(text);
-    const jump = errors.find((e) => e.code === "GEDCOM006");
-    console.log(jump.range);
-    expect(jump).toBeDefined();
   });
 
   it("propagates lexer errors", () => {
