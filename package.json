@@ -1,37 +1,59 @@
 {
-  "name": "vscode-extention-gedcom",
-  "displayName": "GEDCOM Validator",
-  "description": "VS Code extension for GEDCOM file validation with real-time syntax checking",
-  "author": "Your Name",
-  "license": "MIT",
-  "version": "1.0.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lavich/vscode-extention-gedcom"
-  },
-  "workspaces": [
-    "packages/*"
-  ],
+  "name": "gedcom-vscode",
+  "displayName": "GEDCOM Language with Validation (Dev)",
+  "description": "GEDCOM file language support with real-time validation for VS Code",
+  "version": "0.0.7",
+  "preview": true,
+  "main": "dist/extension",
   "scripts": {
+    "test": "vitest",
     "vscode:prepublish": "npm run compile",
-    "compile": "npm run compile:client && npm run compile:server",
-    "compile:client": "cd client && npm run compile",
-    "compile:server": "cd server && npm run compile",
-    "watch": "npm run watch:core & npm run watch:lsp & npm run watch:vscode",
-    "watch:core": "npm run watch -w packages/gedcom-core",
-    "watch:lsp": "npm run watch -w packages/gedcom-lsp",
-    "watch:vscode": "npm run watch -w packages/gedcom-vscode",
-    "open:code": "code --extensionDevelopmentPath=$PWD/packages/gedcom-vscode",
-    "lint": "eslint"
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "open": "code --extensionDevelopmentPath=$PWD"
+  },
+  "dependencies": {
+    "ts-brand": "^0.2.0",
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
   },
   "devDependencies": {
-    "@eslint/js": "^9.13.0",
-    "@stylistic/eslint-plugin": "^2.9.0",
     "@types/node": "^24.3.0",
-    "eslint": "^9.13.0",
-    "mocha": "^10.3.0",
-    "prettier": "^3.6.2",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.1"
+    "vitest": "^3.2.4",
+    "vscode": "^1.1.37"
+  },
+  "publisher": "lavich",
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "gedcom",
+    "genealogy",
+    "validation",
+    "syntax"
+  ],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "activationEvents": [
+    "onLanguage:gedcom"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "gedcom",
+        "aliases": [
+          "GEDCOM",
+          "gedcom"
+        ],
+        "extensions": [
+          ".ged",
+          ".gedcom"
+        ]
+      }
+    ]
   }
 }

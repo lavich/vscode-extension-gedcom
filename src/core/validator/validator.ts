@@ -1,4 +1,4 @@
-import { ASTNode, ValidationError } from "gedcom-core/dist/types";
+import { ASTNode, ValidationError } from "../index";
 import { GedcomTag, GedcomType, Scheme } from "./schema-types";
 import g7validationRaw from "./g7validation.json";
 
@@ -19,7 +19,7 @@ function parseCardinality(str: string): { min: number; max: number } | null {
 
 export function validator(
   nodes: ASTNode[],
-  parentType: GedcomType | string
+  parentType: GedcomType | string,
 ): ValidationError[] {
   const substructure = g7validation.substructure[GedcomType(parentType)];
   if (!substructure) return [];

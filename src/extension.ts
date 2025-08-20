@@ -14,7 +14,7 @@ console.log("GEDCOM extension module loaded");
 export async function activate(context: ExtensionContext) {
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
-    path.join("..", "gedcom-lsp", "dist", "server.js"),
+    path.join("dist", "server.js"),
   );
 
   // The debug options for the server

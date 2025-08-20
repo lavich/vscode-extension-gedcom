@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { validator } from "./validator";
-import { parseGedcom } from "gedcom-core";
+import { parseGedcom } from "../.";
 import { GedcomType } from "./schema-types";
 
 describe("validator", () => {
