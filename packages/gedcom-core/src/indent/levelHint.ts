@@ -1,4 +1,4 @@
-import { ASTNode } from "./types";
+import { ASTNode } from "../types";
 
 type InlayHint = {
   position: {
@@ -18,7 +18,7 @@ export const levelHint = (nodes: ASTNode[]): InlayHint[] => {
       const indent = INDENT.repeat(node.level);
       hint.push({
         position: {
-          line: node.line,
+          line: node.range.start.line,
           character: 0,
         },
         label: indent,

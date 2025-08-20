@@ -1,7 +1,6 @@
 // parser.ts
 import { lex } from "./lexer";
-import type { Token } from "./lexer";
-import type { ASTNode, ValidationError, Range } from "./types";
+import type { ASTNode, ValidationError, Range, Token } from "../types";
 
 function rangeFromTokens(first: Token, last: Token): Range {
   return { start: first.start, end: last.end };
@@ -33,16 +32,17 @@ export function parseGedcom(text: string): ParseResult {
   const stack: ASTNode[] = [];
   const pointerIndex = new Map<string, ASTNode>();
 
-  for (const { line, tokens } of perLine) {
+  for (const { tokens } of perLine) {
     if (tokens.length === 0) continue;
 
     let levelTok: Token | undefined;
     let tagTok: Token | undefined;
     let ptrTok: Token | undefined;
+    let xrefTok: Token | undefined;
     let valTok: Token | undefined;
 
     for (const t of tokens) {
-      switch (t.type) {
+      switch (t.kind) {
         case "LEVEL":
           levelTok = t;
           break;
@@ -51,6 +51,9 @@ export function parseGedcom(text: string): ParseResult {
           break;
         case "POINTER":
           ptrTok = t;
+          break;
+        case "XREF":
+          xrefTok = t;
           break;
         case "VALUE":
           valTok = t;
@@ -63,13 +66,17 @@ export function parseGedcom(text: string): ParseResult {
     const level = parseInt(levelTok.value, 10);
 
     const node: ASTNode = {
+      tokens,
+      range: rangeFromTokens(levelTok, valTok || tagTok),
+
       level,
-      tag: tagTok.value,
+      tag: tagTok?.value,
       pointer: ptrTok?.value,
+      xref: xrefTok?.value,
       value: valTok?.value,
+
       children: [],
-      range: rangeFromTokens(levelTok, valTok ?? tagTok),
-      line,
+      parent: undefined,
     };
 
     attachNode(stack, nodes, node);

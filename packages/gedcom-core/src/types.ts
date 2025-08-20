@@ -1,17 +1,36 @@
 // types.ts
 // Shared types for GEDCOM tooling
 
-export type Offset = number; // absolute 0-based char offset (optional to compute)
-
 export interface Pos {
-  line: number; // 0-based
-  col: number; // 0-based
-  offset?: Offset; // may be omitted if not computed
+  line: number;
+  character: number;
 }
 
 export interface Range {
   start: Pos;
   end: Pos;
+}
+
+export type TokenKind =
+  | "LEVEL"
+  | "POINTER"
+  | "TAG"
+  | "XREF"
+  | "VALUE"
+  | "EOL"
+  | "UNKNOWN";
+
+export interface Token {
+  kind: TokenKind;
+  value: string;
+  start: Pos;
+  end: Pos;
+}
+
+export interface LexError {
+  code: string;
+  message: string;
+  range: Range;
 }
 
 export interface ValidationError {
@@ -21,14 +40,16 @@ export interface ValidationError {
 }
 
 export interface ASTNode {
-  // GEDCOM level
-  level: number;
-  // GEDCOM Tag
-  tag: string;
-  pointer?: string; // e.g. @I1@
-  value?: string; // rest of line after tag
-  children: ASTNode[];
-  range: Range; // covers the entire line for this node
-  // document line
-  line: number; // convenience: start line
+  tokens: Token[]; // все токены строки, в порядке появления
+  range: Range; // покрывает всю строку
+
+  // Семантические данные (связаны с токенами):
+  level: number; // преобразованный level (из токена)
+  tag: string; // тег
+  pointer?: string;
+  xref?: string; // если есть @XREF@
+  value?: string; // текстовое значение
+
+  children: ASTNode[]; // вложенные строки
+  parent?: ASTNode; // ссылка на родителя (для удобства)
 }

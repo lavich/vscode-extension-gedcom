@@ -6,12 +6,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "compile": "tsc -d -p .",
-    "watch": "tsc -watch -d -p ."
-  },
-  "dependencies": {
-    "gedcom-scheme": "*"
+    "watch": "tsc -watch -d -p .",
+    "test": "vitest"
   },
   "devDependencies": {
+    "ts-brand": "^0.2.0",
     "vitest": "^3.2.4"
   }
 }

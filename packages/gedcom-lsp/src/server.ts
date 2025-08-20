@@ -12,12 +12,20 @@ import {
 } from "vscode-languageserver/node";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { parseGedcom, levelHint, levelFolding } from "gedcom-core";
+import {
+  parseGedcom,
+  levelHint,
+  levelFolding,
+  validator,
+  semanticTokens,
+  legend,
+} from "gedcom-core";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
-import { FoldingRange, InlayHintParams } from "vscode-languageserver";
-import { validator } from "gedcom-validator";
-import { buildSemanticTokens, legend } from "./semanticTokens";
-import { lex } from "gedcom-core/dist/lexer";
+import {
+  FoldingRange,
+  InlayHintParams,
+  SemanticTokensBuilder,
+} from "vscode-languageserver";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -55,8 +63,26 @@ connection.languages.semanticTokens.on((params) => {
   const doc = documents.get(params.textDocument.uri);
   if (!doc) return { data: [] };
 
-  const ast = lex(doc.getText());
-  return buildSemanticTokens(ast.perLine);
+  const { nodes } = parseGedcom(doc.getText());
+
+  const tokens = semanticTokens(nodes);
+
+  // console.log("tokens length: ", tokens.length);
+  const builder = new SemanticTokensBuilder();
+  tokens.forEach((token) =>
+    builder.push(
+      token.line,
+      token.char,
+      token.length,
+      token.tokenType,
+      token.tokenModifiers,
+    ),
+  );
+  // console.log(tokens[0]);
+  // builder.push(1, 2, 3, 4, 5);
+  return {
+    data: builder.build().data,
+  };
 });
 
 documents.onDidChangeContent((change) => {
@@ -65,27 +91,9 @@ documents.onDidChangeContent((change) => {
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const text = textDocument.getText();
-  const diagnostics: Diagnostic[] = [];
   const { errors, nodes } = parseGedcom(text);
   const err = validator(nodes, "");
-
-  [...errors, ...err].forEach((error) => {
-    diagnostics.push({
-      code: error.code,
-      message: error.message,
-      range: {
-        start: {
-          line: error.range.start.line,
-          character: error.range.start.col,
-        },
-        end: {
-          line: error.range.end.line,
-          character: error.range.end.col,
-        },
-      },
-    });
-  });
-
+  const diagnostics: Diagnostic[] = [...errors, ...err];
   await connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
