@@ -1,8 +1,8 @@
 import { ASTNode, ValidationError } from "../index";
 import { GedcomTag, GedcomType, Scheme } from "./schema-types";
-import g7validationRaw from "./g7validation.json";
+import g7validationJson from "./g7validation.json";
+import g551validationJson from "./g551validation.json";
 
-const g7validation: Scheme = g7validationRaw;
 enum ValidationErrorCode {
   InvalidTag = "VAL001",
   MissingTag = "VAL002",
@@ -20,8 +20,20 @@ function parseCardinality(str: string): { min: number; max: number } | null {
 export function validator(
   nodes: ASTNode[],
   parentType: GedcomType | string,
+  _version?: number
 ): ValidationError[] {
-  const substructure = g7validation.substructure[GedcomType(parentType)];
+  const version =
+    _version ||
+    parseFloat(
+      nodes
+        .find((node) => node.tag === "HEAD")
+        ?.children.find((node) => node.tag === "GEDC")
+        ?.children.find((node) => node.tag === "VERS")?.value || "5.5.1"
+    );
+
+  const scheme: Scheme = version < 7 ? g551validationJson : g7validationJson;
+
+  const substructure = scheme.substructure[GedcomType(parentType)];
   if (!substructure) return [];
 
   const rules = new Map<
@@ -38,7 +50,7 @@ export function validator(
   }
 
   const errors: ValidationError[] = [];
-  const parentTag = g7validation.tag[GedcomType(parentType)];
+  const parentTag = scheme.tag[GedcomType(parentType)];
 
   for (const node of nodes) {
     if (node.tag === "CONT") continue;
@@ -71,7 +83,7 @@ export function validator(
     }
 
     // рекурсия
-    errors.push(...validator(node.children, rule.type));
+    errors.push(...validator(node.children, rule.type, version));
   }
 
   // проверка на обязательные

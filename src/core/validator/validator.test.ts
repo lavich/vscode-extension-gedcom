@@ -11,7 +11,7 @@ describe("validator", () => {
 1 NOTE
 0 TRLR
 `);
-    const errs = validator(nodes, GedcomType(""));
+    const errs = validator(nodes, GedcomType(""), 7);
     expect(errs.length).toBe(0);
   });
 });
