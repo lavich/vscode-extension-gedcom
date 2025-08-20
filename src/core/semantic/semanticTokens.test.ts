@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { semanticTokens, legend } from "./semanticTokens"; // путь к твоему файлу
+import { semanticTokens, legend } from "."; // путь к твоему файлу
 import type { ASTNode } from "../types";
 
 describe("buildSemanticTokens", () => {

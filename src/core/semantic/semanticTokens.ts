@@ -1,34 +1,5 @@
-import { ASTNode, TokenKind, Token } from "../types";
-
-const tokenTypes = [
-  "number",
-  "variable",
-  "keyword",
-  "string",
-  "comment",
-  "unknown",
-];
-
-const tokenModifiers: string[] = [];
-
-export const legend = {
-  tokenTypes,
-  tokenModifiers,
-};
-
-const tokenMap: Record<TokenKind, string> = {
-  LEVEL: "number",
-  POINTER: "variable",
-  XREF: "variable",
-  TAG: "keyword",
-  VALUE: "string",
-  EOL: "comment",
-  UNKNOWN: "unknown",
-};
-
-function encodeTokenType(type: TokenKind): number {
-  return tokenTypes.indexOf(tokenMap[type]);
-}
+import { ASTNode, Token } from "../types";
+import { tokenTypeIndex, modifierMask } from "./legend";
 
 type SemanticToken = {
   line: number;
@@ -42,12 +13,15 @@ const tokenToSemanticToken = (token: Token): SemanticToken => ({
   line: token.start.line,
   char: token.start.character,
   length: token.end.character - token.start.character,
-  tokenType: encodeTokenType(token.kind),
-  tokenModifiers: 0,
+  tokenType: tokenTypeIndex(token.kind),
+  tokenModifiers: modifierMask(token.kind),
 });
 
 export function semanticTokens(nodes: ASTNode[]): SemanticToken[] {
   return nodes.flatMap((node) => {
-    return [...node.tokens.map(tokenToSemanticToken), ...semanticTokens(node.children)];
+    return [
+      ...node.tokens.map(tokenToSemanticToken),
+      ...semanticTokens(node.children),
+    ];
   });
 }
