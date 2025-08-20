@@ -13,8 +13,11 @@ function attachNode(stack: ASTNode[], root: ASTNode[], node: ASTNode) {
 
   if (stack.length === 0) {
     root.push(node);
+    node.parent = undefined;
   } else {
-    stack[stack.length - 1].children.push(node);
+    const parent = stack[stack.length - 1];
+    parent.children.push(node);
+    node.parent = parent;
   }
 
   stack.push(node);
