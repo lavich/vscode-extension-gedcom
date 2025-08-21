@@ -1,5 +1,5 @@
 import * as path from "path";
-import { workspace, ExtensionContext, commands, window } from "vscode";
+import { workspace, ExtensionContext } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
@@ -38,16 +38,6 @@ export async function activate(context: ExtensionContext) {
   );
 
   await client.start();
-
-  const disposable = commands.registerCommand("gedcom.validate", () => {
-    const activeEditor = window.activeTextEditor;
-    if (activeEditor && activeEditor.document.languageId === "gedcom") {
-      client.sendNotification("gedcom/validate", {
-        uri: activeEditor.document.uri.toString(),
-      });
-    }
-  });
-  context.subscriptions.push(disposable);
 }
 
 export function deactivate(): Thenable<void> | undefined {

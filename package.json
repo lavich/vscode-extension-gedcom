@@ -4,6 +4,8 @@
   "description": "GEDCOM file language support with real-time validation for VS Code",
   "publisher": "lavich",
   "version": "0.0.1",
+  "repository": "https://github.com/lavich/vscode-extension-gedcom.git",
+  "icon": "images/icon.png",
   "categories": [
     "Programming Languages",
     "Linters"
