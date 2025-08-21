@@ -1,15 +1,6 @@
-// types.ts
-// Shared types for GEDCOM tooling
-
-export interface Pos {
-  line: number;
-  character: number;
-}
-
-export interface Range {
-  start: Pos;
-  end: Pos;
-}
+export { Pos, Range } from "./position";
+export { ValidationError } from "./errors";
+import { Pos, Range } from "./position";
 
 export type TokenKind =
   | "LEVEL"
@@ -25,18 +16,6 @@ export interface Token {
   value: string;
   start: Pos;
   end: Pos;
-}
-
-export interface LexError {
-  code: string;
-  message: string;
-  range: Range;
-}
-
-export interface ValidationError {
-  code: string;
-  message: string;
-  range: Range;
 }
 
 export interface ASTNode {

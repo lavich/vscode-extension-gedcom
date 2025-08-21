@@ -1,10 +1,10 @@
 // lexer.ts
-import type { Pos, Token, LexError } from "../types";
+import type { Pos, Token, ValidationError } from "../types";
 
 export function lexLine(
   lineText: string,
   lineNumber: number,
-): { tokens: Token[]; error?: LexError } {
+): { tokens: Token[]; error?: ValidationError } {
   const tokens: Token[] = [];
   let i = 0;
   const len = lineText.length;
@@ -134,7 +134,7 @@ export function lexLine(
 export function lex(text: string) {
   const lines = text.split(/\r?\n/);
   const perLine: { line: number; tokens: Token[] }[] = [];
-  const errors: LexError[] = [];
+  const errors: ValidationError[] = [];
   for (let li = 0; li < lines.length; li++) {
     const line = lines[li];
     const { tokens, error } = lexLine(line, li);
