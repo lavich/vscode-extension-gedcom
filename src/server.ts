@@ -34,8 +34,8 @@ connection.onInitialize(() => {
       foldingRangeProvider: true,
       semanticTokensProvider: {
         legend,
-        range: false, // поддержка SemanticTokens по диапазону
-        full: true, // поддержка SemanticTokens для всего документа
+        range: false,
+        full: true,
       },
     },
   } satisfies InitializeResult;
@@ -63,7 +63,6 @@ connection.languages.semanticTokens.on((params) => {
 
   const tokens = semanticTokens(nodes);
 
-  // console.log("tokens length: ", tokens.length);
   const builder = new SemanticTokensBuilder();
   tokens.forEach((token) =>
     builder.push(
@@ -74,8 +73,6 @@ connection.languages.semanticTokens.on((params) => {
       token.tokenModifiers,
     ),
   );
-  // console.log(tokens[0]);
-  // builder.push(1, 2, 3, 4, 5);
   return {
     data: builder.build().data,
   };

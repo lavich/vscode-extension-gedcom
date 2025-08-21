@@ -1,39 +1,20 @@
 {
   "name": "gedcom-vscode",
-  "displayName": "GEDCOM Language with Validation (Dev)",
+  "displayName": "GEDCOM Tools",
   "description": "GEDCOM file language support with real-time validation for VS Code",
-  "version": "0.0.7",
-  "preview": true,
-  "main": "dist/extension",
-  "scripts": {
-    "test": "vitest",
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p .",
-    "watch": "tsc -watch -p .",
-    "open": "code --extensionDevelopmentPath=$PWD"
-  },
-  "dependencies": {
-    "ts-brand": "^0.2.0",
-    "vscode-languageclient": "^9.0.1",
-    "vscode-languageserver": "^9.0.1",
-    "vscode-languageserver-textdocument": "^1.0.12"
-  },
-  "devDependencies": {
-    "@types/node": "^24.3.0",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4",
-    "vscode": "^1.1.37"
-  },
   "publisher": "lavich",
+  "version": "0.0.1",
   "categories": [
     "Programming Languages",
-    "Other"
+    "Linters"
   ],
   "keywords": [
     "gedcom",
     "genealogy",
+    "family tree",
     "validation",
-    "syntax"
+    "syntax",
+    "parser"
   ],
   "engines": {
     "vscode": "^1.75.0"
@@ -55,5 +36,43 @@
         ]
       }
     ]
+  },
+  "main": "dist/extension.js",
+  "scripts": {
+    "prepare": "husky",
+    "test": "vitest",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "open": "code --extensionDevelopmentPath=$PWD"
+  },
+  "dependencies": {
+    "ts-brand": "^0.2.0",
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/node": "^24.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
+    "eslint": "^9.33.0",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.5.1",
+    "lint-staged": "^16.1.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.40.0",
+    "vitest": "^3.2.4",
+    "vscode": "^1.1.37"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "vitest related --run"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

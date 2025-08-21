@@ -135,13 +135,11 @@ export function lex(text: string) {
   const lines = text.split(/\r?\n/);
   const perLine: { line: number; tokens: Token[] }[] = [];
   const errors: LexError[] = [];
-  let offset = 0;
   for (let li = 0; li < lines.length; li++) {
     const line = lines[li];
     const { tokens, error } = lexLine(line, li);
     perLine.push({ line: li, tokens });
     if (error) errors.push(error);
-    offset += line.length + 1;
   }
   return { perLine, errors };
 }
