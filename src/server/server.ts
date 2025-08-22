@@ -17,10 +17,12 @@ import {
   validator,
   semanticTokens,
   legend,
+  ParseResult,
 } from "../core";
 
 export const createServer = (connection: Connection) => {
   const documents = new TextDocuments(TextDocument);
+  const cache = new Map<string, ParseResult>();
 
   connection.onInitialize(() => {
     return {
@@ -38,26 +40,22 @@ export const createServer = (connection: Connection) => {
   });
 
   connection.languages.inlayHint.on((params: InlayHintParams): InlayHint[] => {
-    const doc = documents.get(params.textDocument.uri);
-    if (!doc) return [];
-    const { nodes } = parseGedcom(doc.getText());
-    return levelHint(nodes);
+    const parsed = cache.get(params.textDocument.uri);
+    if (!parsed) return [];
+    return levelHint(parsed.nodes);
   });
 
   connection.onFoldingRanges((params): FoldingRange[] => {
-    const doc = documents.get(params.textDocument.uri);
-    if (!doc) return [];
-    const { nodes } = parseGedcom(doc.getText());
-    return levelFolding(nodes);
+    const parsed = cache.get(params.textDocument.uri);
+    if (!parsed) return [];
+    return levelFolding(parsed.nodes);
   });
 
   connection.languages.semanticTokens.on((params) => {
-    const doc = documents.get(params.textDocument.uri);
-    if (!doc) return { data: [] };
+    const parsed = cache.get(params.textDocument.uri);
+    if (!parsed) return { data: [] };
 
-    const { nodes } = parseGedcom(doc.getText());
-
-    const tokens = semanticTokens(nodes);
+    const tokens = semanticTokens(parsed.nodes);
 
     const builder = new SemanticTokensBuilder();
     tokens.forEach((token) =>
@@ -74,19 +72,15 @@ export const createServer = (connection: Connection) => {
     };
   });
 
-  documents.onDidChangeContent((change) => {
-    validateTextDocument(change.document);
-  });
-
-  async function validateTextDocument(
-    textDocument: TextDocument
-  ): Promise<void> {
-    const text = textDocument.getText();
+  documents.onDidChangeContent(async (change) => {
+    const parsed = parseGedcom(change.document.getText());
+    cache.set(change.document.uri, parsed);
+    const text = change.document.getText();
     const { errors, nodes } = parseGedcom(text);
     const err = validator(nodes, "");
     const diagnostics: Diagnostic[] = [...errors, ...err];
-    await connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
-  }
+    await connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
+  });
 
   documents.listen(connection);
   connection.listen();

@@ -1,4 +1,4 @@
-export { parseGedcom } from "./parser/parser";
+export * from "./parser";
 export { levelHint } from "./indent/levelHint";
 export { levelFolding } from "./folding/levelFolding";
 export { validator } from "./validator/validator";
