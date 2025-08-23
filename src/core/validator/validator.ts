@@ -28,7 +28,8 @@ export function validator(
       nodes
         .find((node) => node.tag === "HEAD")
         ?.children.find((node) => node.tag === "GEDC")
-        ?.children.find((node) => node.tag === "VERS")?.value || "5.5.1"
+        ?.children.find((node) => node.tag === "VERS")
+        ?.values?.find(parseFloat) || "5.5.1"
     );
 
   const scheme: Scheme = version < 7 ? g551validationJson : g7validationJson;
@@ -53,8 +54,6 @@ export function validator(
   const parentTag = scheme.tag[GedcomType(parentType)];
 
   for (const node of nodes) {
-    if (node.tag === "CONT") continue;
-
     const tag = GedcomTag(node.tag);
     const rule = rules.get(tag);
 

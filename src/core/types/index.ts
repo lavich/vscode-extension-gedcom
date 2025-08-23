@@ -26,8 +26,8 @@ export interface ASTNode {
   level: number; // преобразованный level (из токена)
   tag: string; // тег
   pointer?: string;
-  xref?: string; // если есть @XREF@
-  value?: string; // текстовое значение
+  xrefs?: string[]; // если есть @XREF@
+  values?: string[]; // текстовое значение
 
   children: ASTNode[]; // вложенные строки
   parent?: ASTNode; // ссылка на родителя (для удобства)
