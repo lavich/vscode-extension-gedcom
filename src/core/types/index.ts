@@ -1,6 +1,6 @@
-export { Pos, Range } from "./position";
+export { Position, Range } from "./position";
 export { ValidationError } from "./errors";
-import { Pos, Range } from "./position";
+import { Position, Range } from "./position";
 
 export type TokenKind =
   | "LEVEL"
@@ -14,8 +14,8 @@ export type TokenKind =
 export interface Token {
   kind: TokenKind;
   value: string;
-  start: Pos;
-  end: Pos;
+  start: Position;
+  end: Position;
 }
 
 export interface ASTNode {
@@ -26,8 +26,8 @@ export interface ASTNode {
   level: number; // преобразованный level (из токена)
   tag: string; // тег
   pointer?: string;
-  xref?: string; // если есть @XREF@
-  value?: string; // текстовое значение
+  xrefs?: string[]; // если есть @XREF@
+  values?: string[]; // текстовое значение
 
   children: ASTNode[]; // вложенные строки
   parent?: ASTNode; // ссылка на родителя (для удобства)

@@ -1,145 +1,186 @@
-// lexer.ts
-import type { Pos, Token, ValidationError } from "../types";
+import type { Position, Token, ValidationError } from "../types";
 
-export function lexLine(
-  lineText: string,
-  lineNumber: number,
-): { tokens: Token[]; error?: ValidationError } {
-  const tokens: Token[] = [];
-  let i = 0;
-  const len = lineText.length;
+type LexResult = {
+  tokens: Token[];
+  errors: ValidationError[];
+};
 
-  const makePos = (col: number): Pos => ({
-    line: lineNumber,
-    character: col,
-  });
+const makePos = (line: number, col: number): Position => ({
+  line,
+  character: col,
+});
 
-  // --- LEVEL ---
-  let levelStr = "";
-  while (i < len && /[0-9]/.test(lineText.charAt(i))) {
-    levelStr += lineText.charAt(i);
-    i++;
+function pushError(
+  errors: ValidationError[],
+  code: string,
+  message: string,
+  line: number,
+  startCol: number,
+  endCol?: number
+) {
+  const p1 = makePos(line, startCol);
+  const p2 = makePos(line, endCol ?? startCol);
+  errors.push({ code, message, range: { start: p1, end: p2 } });
+}
+
+// --- READERS ---
+
+function readLevel(
+  line: string,
+  i: number,
+  lineNo: number,
+  tokens: Token[],
+  errors: ValidationError[]
+) {
+  const m = /^(\d+)/.exec(line.slice(i));
+  if (!m) {
+    pushError(errors, "LEX001", "Missing level", lineNo, i);
+    return line.length;
   }
-  if (!levelStr.length) {
-    const p = makePos(0);
-    return {
-      tokens,
-      error: {
-        code: "LEX001",
-        message: "Missing level",
-        range: { start: p, end: p },
-      },
-    };
-  }
+  const value = m[1];
   tokens.push({
     kind: "LEVEL",
-    value: levelStr,
-    start: makePos(0),
-    end: makePos(i),
+    value,
+    start: makePos(lineNo, i),
+    end: makePos(lineNo, i + value.length),
   });
+  return i + value.length;
+}
 
-  if (i < len && lineText.charAt(i) === " ") i++;
-  else if (i < len) {
-    const p = makePos(i);
-    return {
-      tokens,
-      error: {
-        code: "LEX002",
-        message: "Missing space after level",
-        range: { start: p, end: p },
-      },
-    };
+function skipSpaces(line: string, i: number): number {
+  while (i < line.length && line[i] === " ") i++;
+  return i;
+}
+
+function readPointer(
+  line: string,
+  i: number,
+  lineNo: number,
+  tokens: Token[],
+  errors: ValidationError[]
+) {
+  if (line[i] !== "@") return i;
+
+  const m = /^(@[^@]+@)/.exec(line.slice(i));
+  if (!m) {
+    pushError(errors, "LEX004", "Unterminated pointer", lineNo, i);
+    return line.length;
   }
 
-  // --- POINTER (start of line) ---
-  if (i < len && lineText.charAt(i) === "@") {
-    const startCol = i;
-    i++;
-    while (i < len && lineText.charAt(i) !== "@") i++;
-    if (i < len && lineText.charAt(i) === "@") {
-      i++;
-      const ptr = lineText.slice(startCol, i);
-      tokens.push({
-        kind: "POINTER",
-        value: ptr,
-        start: makePos(startCol),
-        end: makePos(i),
-      });
-      if (i < len && lineText.charAt(i) === " ") i++;
-    } else {
-      const p = makePos(startCol);
-      return {
-        tokens,
-        error: {
-          code: "LEX004",
-          message: "Unterminated pointer",
-          range: { start: p, end: p },
-        },
-      };
-    }
-  }
+  const ptr = m[1];
+  tokens.push({
+    kind: "POINTER",
+    value: ptr,
+    start: makePos(lineNo, i),
+    end: makePos(lineNo, i + ptr.length),
+  });
+  return i + ptr.length;
+}
 
-  // --- TAG ---
-  const tagStart = i;
-  while (i < len && lineText.charAt(i) !== " ") i++;
-  if (i === tagStart) {
-    const p = makePos(i);
-    return {
-      tokens,
-      error: {
-        code: "LEX005",
-        message: "Missing tag",
-        range: { start: p, end: p },
-      },
-    };
+function readTag(
+  line: string,
+  i: number,
+  lineNo: number,
+  tokens: Token[],
+  errors: ValidationError[]
+) {
+  const m = /^([A-Z0-9_]+)/.exec(line.slice(i));
+  if (!m) {
+    pushError(errors, "LEX005", "Missing tag", lineNo, i);
+    return line.length;
   }
-  const tag = lineText.slice(tagStart, i);
+  const tag = m[1];
   tokens.push({
     kind: "TAG",
     value: tag,
-    start: makePos(tagStart),
-    end: makePos(i),
+    start: makePos(lineNo, i),
+    end: makePos(lineNo, i + tag.length),
   });
+  return i + tag.length;
+}
 
-  // --- VALUE + XREF inside VALUE ---
-  let valueToken: Token | undefined;
-  if (i < len) {
-    if (lineText.charAt(i) === " ") i++;
-    const valStart = i;
-    const val = lineText.slice(i).trim();
+function readValue(line: string, i: number, lineNo: number, tokens: Token[]) {
+  if (i >= line.length) return i;
 
-    const xrefRegex = /^@[^@]+@$/; // только одиночный XREF
-    if (xrefRegex.test(val)) {
-      // если значение - это только XREF
+  i = skipSpaces(line, i);
+  const valStart = i;
+  const rawValue = line.slice(i);
+
+  const xrefRegex = /@[^@]+@/g;
+  let lastIndex = 0;
+
+  for (const m of rawValue.matchAll(xrefRegex)) {
+    if (m.index! > lastIndex) {
       tokens.push({
-        kind: "XREF",
-        value: val,
-        start: makePos(valStart),
-        end: makePos(len),
-      });
-    } else if (val.length) {
-      valueToken = {
         kind: "VALUE",
-        value: val,
-        start: makePos(valStart),
-        end: makePos(len),
-      };
-      tokens.push(valueToken);
+        value: rawValue.slice(lastIndex, m.index),
+        start: makePos(lineNo, valStart + lastIndex),
+        end: makePos(lineNo, valStart + m.index),
+      });
     }
+    tokens.push({
+      kind: "XREF",
+      value: m[0],
+      start: makePos(lineNo, valStart + m.index!),
+      end: makePos(lineNo, valStart + m.index! + m[0].length),
+    });
+    lastIndex = m.index! + m[0].length;
   }
 
-  return { tokens };
+  if (lastIndex < rawValue.length) {
+    tokens.push({
+      kind: "VALUE",
+      value: rawValue.slice(lastIndex),
+      start: makePos(lineNo, valStart + lastIndex),
+      end: makePos(lineNo, line.length),
+    });
+  }
+
+  return line.length;
+}
+
+// --- MAIN ---
+
+export function lexLine(line: string, lineNo: number): LexResult {
+  const tokens: Token[] = [];
+  const errors: ValidationError[] = [];
+
+  // --- empty line ---
+  if (line.trim() === "") {
+    return { tokens, errors };
+  }
+
+  let i = 0;
+
+  // LEVEL
+  i = readLevel(line, i, lineNo, tokens, errors);
+  i = skipSpaces(line, i);
+
+  // POINTER (optional)
+  if (line[i] === "@") {
+    i = readPointer(line, i, lineNo, tokens, errors);
+    i = skipSpaces(line, i);
+  }
+
+  // TAG
+  i = readTag(line, i, lineNo, tokens, errors);
+
+  // VALUE
+  readValue(line, i, lineNo, tokens);
+
+  return { tokens, errors };
 }
 
 export function lex(text: string) {
   const lines = text.split(/\r?\n/);
   const perLine: { line: number; tokens: Token[] }[] = [];
   const errors: ValidationError[] = [];
+
   for (let li = 0; li < lines.length; li++) {
-    const line = lines[li];
-    const { tokens, error } = lexLine(line, li);
+    const { tokens, errors: errs } = lexLine(lines[li], li);
     perLine.push({ line: li, tokens });
-    if (error) errors.push(error);
+    errors.push(...errs);
   }
+
   return { perLine, errors };
 }
