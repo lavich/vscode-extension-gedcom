@@ -1,4 +1,4 @@
-import { ASTNode } from "../types";
+import { ASTNode } from "../../core";
 
 type FoldingRange = { startLine: number; endLine: number };
 

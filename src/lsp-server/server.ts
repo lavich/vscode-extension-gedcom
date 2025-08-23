@@ -6,21 +6,19 @@ import {
   Diagnostic,
   TextDocuments,
   TextDocumentSyncKind,
-  Location,
 } from "vscode-languageserver";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
 import {
   parseGedcom,
-  levelHint,
-  levelFolding,
   validator,
-  findNodeAtPosition,
-  semanticTokens,
-  legend,
   ParseResult,
+  getDefinitionsAtPosition,
 } from "../core";
+import { levelHint } from "./indent/levelHint";
+import { levelFolding } from "./folding/levelFolding";
+import { legend, semanticTokens } from "./semantic";
 
 export const createServer = (connection: Connection) => {
   const documents = new TextDocuments(TextDocument);
@@ -79,26 +77,11 @@ export const createServer = (connection: Connection) => {
     const parseResult = cache.get(params.textDocument.uri);
     if (!parseResult) return null;
 
-    const node = findNodeAtPosition(parseResult.nodes, params.position);
-    if (!node) return null;
-
-    if (node.pointer) {
-      return parseResult.xrefsIndex
-        .get(node.pointer)
-        ?.filter(Boolean)
-        .flatMap((nodeSet) => nodeSet)
-        .filter(Boolean)
-        .map((node) => Location.create(params.textDocument.uri, node!.range));
-    }
-
-    if (node.xrefs?.length) {
-      return node.xrefs
-        .map((xref) => parseResult.pointerIndex.get(xref))
-        .filter(Boolean)
-        .map((node) => Location.create(params.textDocument.uri, node!.range));
-    }
-
-    return null;
+    return getDefinitionsAtPosition(
+      parseResult,
+      params.position,
+      params.textDocument.uri
+    );
   });
 
   documents.onDidChangeContent(async (change) => {

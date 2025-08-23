@@ -1,4 +1,4 @@
-import { ASTNode } from "../types";
+import { ASTNode } from "../../core";
 
 type InlayHint = {
   position: {
