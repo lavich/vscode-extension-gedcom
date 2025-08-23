@@ -4,12 +4,13 @@ import g7validationJson from "./g7validation.json";
 import g551validationJson from "./g551validation.json";
 
 enum ValidationErrorCode {
-  InvalidTag = "VAL001",
+  UnknownTag = "VAL001",
   MissingTag = "VAL002",
   MissingValue = "VAL003",
   IncorrectValue = "VAL004",
   ShouldBeSetValue = "VAL005",
   MissingRef = "VAL006",
+  ManyOccurrences = "VAL007",
 }
 
 function parseCardinality(str: string): { min: number; max: number } | null {
@@ -63,8 +64,8 @@ export function validator(
 
     if (!rule) {
       errors.push({
-        code: ValidationErrorCode.InvalidTag,
-        message: `Invalid tag ${tag} in parent ${parentTag}`,
+        code: ValidationErrorCode.UnknownTag,
+        message: `Unknown tag ${tag} in parent ${parentTag}`,
         range: node.range,
       });
       continue;
@@ -72,7 +73,7 @@ export function validator(
 
     if (rule.max === 0) {
       errors.push({
-        code: ValidationErrorCode.InvalidTag,
+        code: ValidationErrorCode.ManyOccurrences,
         message: `Too many occurrences of ${tag} in parent ${parentTag}`,
         range: node.range,
       });

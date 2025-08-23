@@ -4,4 +4,3 @@ tsconfig.json
 .husky/
 .idea/
 .vscode/
-node_modules/

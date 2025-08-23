@@ -27,16 +27,6 @@ code --install-extension lavich.gedcom-vscode
 
 ---
 
-## 📝 Release Notes
-
-### 0.0.1
-
-- Initial release
-- Syntax highlighting
-- Basic validation
-
----
-
 ## 🤝 Contributing
 
 Want to contribute? Great!
