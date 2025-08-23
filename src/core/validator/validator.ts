@@ -1,11 +1,15 @@
 import { ASTNode, ValidationError } from "../index";
-import { GedcomTag, GedcomType, Scheme } from "./schema-types";
+import { GedcomTag, GedcomType, Payload, Scheme } from "./schema-types";
 import g7validationJson from "./g7validation.json";
 import g551validationJson from "./g551validation.json";
 
 enum ValidationErrorCode {
   InvalidTag = "VAL001",
   MissingTag = "VAL002",
+  MissingValue = "VAL003",
+  IncorrectValue = "VAL004",
+  ShouldBeSetValue = "VAL005",
+  MissingRef = "VAL006",
 }
 
 function parseCardinality(str: string): { min: number; max: number } | null {
@@ -17,20 +21,21 @@ function parseCardinality(str: string): { min: number; max: number } | null {
   return { min, max };
 }
 
+const foundVersion = (nodes: ASTNode[]) =>
+  parseFloat(
+    nodes
+      .find((node) => node.tag === "HEAD")
+      ?.children.find((node) => node.tag === "GEDC")
+      ?.children.find((node) => node.tag === "VERS")
+      ?.values?.find(parseFloat) || "5.5.1"
+  );
+
 export function validator(
   nodes: ASTNode[],
-  parentType: GedcomType | string,
+  parentType: GedcomType | string = "",
   _version?: number
 ): ValidationError[] {
-  const version =
-    _version ||
-    parseFloat(
-      nodes
-        .find((node) => node.tag === "HEAD")
-        ?.children.find((node) => node.tag === "GEDC")
-        ?.children.find((node) => node.tag === "VERS")
-        ?.values?.find(parseFloat) || "5.5.1"
-    );
+  const version = _version || foundVersion(nodes);
 
   const scheme: Scheme = version < 7 ? g551validationJson : g7validationJson;
 
@@ -39,14 +44,14 @@ export function validator(
 
   const rules = new Map<
     GedcomTag,
-    { min: number; max: number; type: GedcomType }
+    { min: number; max: number; type: GedcomType; payload: Payload }
   >();
 
   for (const [tagStr, { cardinality, type }] of Object.entries(substructure)) {
     const tag = GedcomTag(tagStr);
     const parsed = parseCardinality(cardinality);
     if (parsed) {
-      rules.set(tag, { ...parsed, type: GedcomType(type) });
+      rules.set(tag, { ...parsed, type, payload: scheme.payload[type] });
     }
   }
 
@@ -66,7 +71,6 @@ export function validator(
       continue;
     }
 
-    // учёт встретившегося тега
     if (rule.max === 0) {
       errors.push({
         code: ValidationErrorCode.InvalidTag,
@@ -81,11 +85,46 @@ export function validator(
       rule.min--;
     }
 
-    // рекурсия
+    if (rule.payload.type) {
+      if (rule.payload.type === "Y|<NULL>") {
+        if (node.values?.length && node.values[0] !== "Y") {
+          errors.push({
+            code: ValidationErrorCode.IncorrectValue,
+            message: `Incorrect value ${node.values?.[0]} for ${tag}`,
+            range: node.range,
+          });
+        }
+      } else if (rule.payload.type === "https://gedcom.io/terms/v7/type-Enum") {
+        const mapSet = scheme.set[rule.payload.set];
+
+        if (node.values?.length !== 1 || !mapSet[node.values?.[0]]) {
+          const values = Object.keys(mapSet).join(", ");
+          errors.push({
+            code: ValidationErrorCode.ShouldBeSetValue,
+            message: `Value for ${tag} should be in set [${values}]`,
+            range: node.range,
+          });
+        }
+      } else if (rule.payload.type === "pointer") {
+        if (!node.xrefs?.length) {
+          errors.push({
+            code: ValidationErrorCode.MissingRef,
+            message: `Missing ref for ${tag}`,
+            range: node.range,
+          });
+        }
+      } else if (!node.values?.length && !node.xrefs?.length) {
+        errors.push({
+          code: ValidationErrorCode.MissingValue,
+          message: `Missing value for ${tag}`,
+          range: node.range,
+        });
+      }
+    }
+
     errors.push(...validator(node.children, rule.type, version));
   }
 
-  // проверка на обязательные
   for (const [tag, rule] of rules) {
     if (rule.min > 0) {
       errors.push({

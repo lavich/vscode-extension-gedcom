@@ -6,42 +6,39 @@ export type GedcomType = Brand<string, "GedcomType">;
 export const GedcomType = make<GedcomType>();
 
 export interface Scheme {
-  calendar: Calendar;
-  label: Label;
-  payload: Payload;
-  set: Set;
-  substructure: Substructure;
-  tag: Tags;
+  calendar: Record<GedcomTag, Calendar>;
+  label: Record<GedcomType, Label>;
+  payload: Record<GedcomType, Payload>;
+  set: Record<GedcomType, Set>;
+  substructure: Record<GedcomType, Substructure>;
+  tag: Record<GedcomType, GedcomTag>;
   tagInContext: TagInContext;
 }
 
-export type Calendar = Record<
-  GedcomTag,
-  { epochs: string[]; months: Months; type: GedcomType }
->;
+export type Calendar = { epochs: string[]; months: Months; type: GedcomType };
 export type Months = Record<GedcomTag, GedcomType>;
-export type Label = Record<GedcomType, Record<"en-US", string>>;
-export type Payload = Record<
-  GedcomType,
+export type Label = Record<"en-US", string>;
+export type Payload =
+  | {
+      type: null | "Y|<NULL>";
+    }
+  | {
+      to: GedcomType;
+      type: "pointer";
+    }
+  | {
+      set: GedcomType;
+      type: "https://gedcom.io/terms/v7/type-Enum";
+    };
+
+export type Set = Record<string, GedcomType>;
+export type Substructure = Record<
+  GedcomTag,
   {
-    to?: GedcomType;
-    set?: GedcomType;
-    type: string | null;
+    cardinality: string;
+    type: GedcomType;
   }
 >;
-export type Set = Record<GedcomType, Record<GedcomTag, GedcomType>>;
-export type Substructure = Record<
-  GedcomType,
-  Record<
-    GedcomTag,
-    {
-      cardinality: string;
-      type: GedcomType;
-    }
-  >
->;
-
-export type Tags = Record<GedcomType, GedcomTag>;
 
 export interface TagInContext {
   cal: Cal;
