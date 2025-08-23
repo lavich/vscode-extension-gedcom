@@ -1,3 +1,7 @@
+### 0.0.4
+
+- Fix previews version
+
 ### 0.0.3
 
 - Basic validation of node values
