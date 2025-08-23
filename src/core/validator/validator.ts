@@ -21,14 +21,13 @@ function parseCardinality(str: string): { min: number; max: number } | null {
   return { min, max };
 }
 
-const foundVersion = (nodes: ASTNode[]) =>
-  parseFloat(
-    nodes
-      .find((node) => node.tag === "HEAD")
-      ?.children.find((node) => node.tag === "GEDC")
-      ?.children.find((node) => node.tag === "VERS")
-      ?.values?.find(parseFloat) || "5.5.1"
-  );
+function foundVersion(nodes: ASTNode[]): number {
+  const head = nodes.find(n => n.tag === "HEAD");
+  const vers = head?.children.find(n => n.tag === "GEDC")
+    ?.children.find(n => n.tag === "VERS")
+    ?.values?.[0];
+  return parseFloat(vers ?? "5.5.1");
+}
 
 export function validator(
   nodes: ASTNode[],

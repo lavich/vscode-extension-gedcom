@@ -23,17 +23,17 @@ describe("parser", () => {
     expect(n1?.children.length).toBeGreaterThan(0);
 
     // первый ребёнок у I1 — NAME
-    const nameNode = n1?.children.find(c => c.tag === "NAME");
+    const nameNode = n1?.children.find((c) => c.tag === "NAME");
     expect(nameNode).toBeDefined();
     expect(nameNode!.parent).toBe(n1);
 
     // у I1 также есть BIRT
-    const birtNode = n1?.children.find(c => c.tag === "BIRT");
+    const birtNode = n1?.children.find((c) => c.tag === "BIRT");
     expect(birtNode).toBeDefined();
     expect(birtNode!.parent).toBe(n1);
 
     // у BIRT должен быть DATE
-    const dateNode = birtNode!.children.find(c => c.tag === "DATE");
+    const dateNode = birtNode!.children.find((c) => c.tag === "DATE");
     expect(dateNode).toBeDefined();
     expect(dateNode!.parent).toBe(birtNode);
 
@@ -43,7 +43,7 @@ describe("parser", () => {
     expect(n2!.tag).toBe("INDI");
     expect(n2!.parent).toBeUndefined();
 
-    const name2 = n2!.children.find(c => c.tag === "NAME");
+    const name2 = n2!.children.find((c) => c.tag === "NAME");
     expect(name2).toBeDefined();
     expect(name2!.parent).toBe(n2);
   });
@@ -52,5 +52,13 @@ describe("parser", () => {
     const text = `0 @I1@ INDI\n1`; // missing space/tag after level on second line
     const { errors } = parseGedcom(text);
     expect(errors.length).toBeGreaterThan(0);
+  });
+
+  it("should be correct node ranges", () => {
+    const { nodes } = parseGedcom(SAMPLE);
+    expect(nodes[0].range.start.line).toBe(0);
+    expect(nodes[0].range.end.line).toBe(3);
+    expect(nodes[0].range.start.character).toBe(0);
+    expect(nodes[0].range.end.character).toBe(17);
   });
 });

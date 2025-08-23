@@ -6,6 +6,7 @@ import {
   Diagnostic,
   TextDocuments,
   TextDocumentSyncKind,
+  Location,
 } from "vscode-languageserver";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -15,6 +16,7 @@ import {
   levelHint,
   levelFolding,
   validator,
+  findNodeAtPosition,
   semanticTokens,
   legend,
   ParseResult,
@@ -30,6 +32,7 @@ export const createServer = (connection: Connection) => {
         textDocumentSync: TextDocumentSyncKind.Incremental,
         inlayHintProvider: true,
         foldingRangeProvider: true,
+        definitionProvider: true,
         semanticTokensProvider: {
           legend,
           range: false,
@@ -70,6 +73,32 @@ export const createServer = (connection: Connection) => {
     return {
       data: builder.build().data,
     };
+  });
+
+  connection.onDefinition((params) => {
+    const parseResult = cache.get(params.textDocument.uri);
+    if (!parseResult) return null;
+
+    const node = findNodeAtPosition(parseResult.nodes, params.position);
+    if (!node) return null;
+
+    if (node.pointer) {
+      return parseResult.xrefsIndex
+        .get(node.pointer)
+        ?.filter(Boolean)
+        .flatMap((nodeSet) => nodeSet)
+        .filter(Boolean)
+        .map((node) => Location.create(params.textDocument.uri, node!.range));
+    }
+
+    if (node.xrefs?.length) {
+      return node.xrefs
+        .map((xref) => parseResult.pointerIndex.get(xref))
+        .filter(Boolean)
+        .map((node) => Location.create(params.textDocument.uri, node!.range));
+    }
+
+    return null;
   });
 
   documents.onDidChangeContent(async (change) => {

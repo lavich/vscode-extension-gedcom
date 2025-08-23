@@ -1,9 +1,9 @@
-export interface Pos {
+export interface Position {
   line: number;
   character: number;
 }
 
 export interface Range {
-  start: Pos;
-  end: Pos;
+  start: Position;
+  end: Position;
 }

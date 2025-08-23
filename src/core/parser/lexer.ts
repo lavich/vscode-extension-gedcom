@@ -1,11 +1,11 @@
-import type { Pos, Token, ValidationError } from "../types";
+import type { Position, Token, ValidationError } from "../types";
 
 type LexResult = {
   tokens: Token[];
   errors: ValidationError[];
 };
 
-const makePos = (line: number, col: number): Pos => ({
+const makePos = (line: number, col: number): Position => ({
   line,
   character: col,
 });
