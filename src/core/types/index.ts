@@ -1,6 +1,6 @@
 export { Position, Range } from "./position";
 export { ValidationError } from "./errors";
-import { Position, Range } from "./position";
+import { Range } from "./position";
 
 export type TokenKind =
   | "LEVEL"

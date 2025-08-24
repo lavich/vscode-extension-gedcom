@@ -1,13 +1,13 @@
 import type { ASTNode, Token } from "../../../core";
 import { tokenTypeIndex, modifierMask } from "./legend";
 
-type SemanticToken = {
+interface SemanticToken {
   line: number;
   char: number;
   length: number;
   tokenType: number;
   tokenModifiers: number;
-};
+}
 
 const tokenToSemanticToken = (token: Token): SemanticToken => ({
   line: token.range.start.line,

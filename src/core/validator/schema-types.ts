@@ -15,7 +15,11 @@ export interface Scheme {
   tagInContext: TagInContext;
 }
 
-export type Calendar = { epochs: string[]; months: Months; type: GedcomType };
+export interface Calendar {
+  epochs: string[];
+  months: Months;
+  type: GedcomType;
+}
 export type Months = Record<GedcomTag, GedcomType>;
 export type Label = Record<"en-US", string>;
 export type Payload =
