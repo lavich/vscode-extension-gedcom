@@ -5,3 +5,5 @@ tsconfig.json
 .idea/
 .vscode/
 coverage
+eslint.config.mts
+.github/
