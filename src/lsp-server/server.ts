@@ -1,22 +1,25 @@
 import {
+  Connection,
+  Diagnostic,
+  DiagnosticSeverity,
   FoldingRange,
   InlayHintParams,
   SemanticTokensBuilder,
-  Connection,
-  Diagnostic,
+  TextDocumentPositionParams,
   TextDocuments,
   TextDocumentSyncKind,
-  DiagnosticSeverity,
 } from "vscode-languageserver";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
-import { parseGedcom, validator, ParseResult } from "../core";
+import { parseGedcom, ParseResult, validator } from "../core";
 
 import { levelFolding } from "./utils/folding/levelFolding";
 import { legend, semanticTokens } from "./utils/semantic";
 import { levelIndent } from "./utils/indent/levelIndent";
 import { getDefinitionsAtPosition } from "./utils/getDefinitionsAtPosition";
+import { Hover } from "vscode-languageclient";
+import { hoverTag } from "./libs/hoverTag";
 
 export const createServer = (connection: Connection) => {
   const documents = new TextDocuments(TextDocument);
@@ -29,6 +32,7 @@ export const createServer = (connection: Connection) => {
         inlayHintProvider: true,
         foldingRangeProvider: true,
         definitionProvider: true,
+        hoverProvider: true,
         semanticTokensProvider: {
           legend,
           range: false,
@@ -80,6 +84,16 @@ export const createServer = (connection: Connection) => {
       params.position,
       params.textDocument.uri
     );
+  });
+
+  connection.onHover((params: TextDocumentPositionParams): Hover | null => {
+    const doc = documents.get(params.textDocument.uri);
+    if (!doc) return null;
+
+    const parseResult = cache.get(params.textDocument.uri);
+    if (!parseResult) return null;
+
+    return hoverTag(parseResult.nodes, params.position);
   });
 
   documents.onDidChangeContent(async (change) => {

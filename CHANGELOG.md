@@ -1,3 +1,7 @@
+### 0.0.7
+
+- Add tag labels on hover
+
 ### 0.0.5
 
 - Improve the validator
