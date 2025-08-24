@@ -4,3 +4,6 @@ tsconfig.json
 .husky/
 .idea/
 .vscode/
+coverage
+eslint.config.mts
+.github/

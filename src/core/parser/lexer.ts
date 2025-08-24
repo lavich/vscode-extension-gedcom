@@ -1,9 +1,9 @@
 import type { Position, Token, ValidationError } from "../types";
 
-type LexResult = {
+interface LexResult {
   tokens: Token[];
   errors: ValidationError[];
-};
+}
 
 const makePos = (line: number, col: number): Position => ({
   line,
@@ -132,8 +132,7 @@ function readValue(line: string, i: number, lineNo: number, tokens: Token[]) {
       range: {
         start: makePos(lineNo, valStart + m.index!),
         end: makePos(lineNo, valStart + m.index! + m[0].length),
-      }
-
+      },
     });
     lastIndex = m.index! + m[0].length;
   }

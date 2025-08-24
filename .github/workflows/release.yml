@@ -1,0 +1,47 @@
+name: Release VS Code Extension
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check if version was bumped
+        id: version-check
+        run: |
+          PREV_SHA=$(git rev-parse HEAD~1)
+          if git diff $PREV_SHA HEAD -- package.json | grep '"version"'; then
+            echo "manual_bump=true" >> $GITHUB_OUTPUT
+          else
+            echo "manual_bump=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Auto bump patch
+        if: steps.version-check.outputs.manual_bump == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm version patch -m "chore(release): %s [skip ci]"
+          git push origin main --tags
+
+      - name: Publish extension
+        run: npx vsce publish
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
