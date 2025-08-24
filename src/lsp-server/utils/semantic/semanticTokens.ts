@@ -1,4 +1,4 @@
-import { ASTNode, Token } from "../../core";
+import { ASTNode, Token } from "../../../core";
 import { tokenTypeIndex, modifierMask } from "./legend";
 
 type SemanticToken = {

@@ -1,1 +1,1 @@
-export { getDefinitionsAtPosition } from "./getDefinitionsAtPosition";
+export { findNodeAtPosition, positionInRange } from "./findNodeAtPosition";

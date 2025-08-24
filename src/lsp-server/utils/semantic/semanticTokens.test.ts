@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { semanticTokens, legend } from "./index";
-import type { ASTNode } from "../../core";
+import type { ASTNode } from "../../../core";
 
 describe("buildSemanticTokens", () => {
   it("должен возвращать пустой массив для пустого AST", () => {

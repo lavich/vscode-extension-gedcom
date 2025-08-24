@@ -1,4 +1,4 @@
-import { TokenKind } from "../../core";
+import { TokenKind } from "../../../core";
 
 export const tokenTypes = [
   "number",

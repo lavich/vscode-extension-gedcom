@@ -1,7 +1,7 @@
 import { Location, Position } from "vscode-languageserver";
 
-import { findNodeAtPosition, positionInRange } from "./findNodeAtPosition";
-import { ASTNode, ParseResult } from "../index";
+import { findNodeAtPosition, positionInRange } from "../../core";
+import { ASTNode, ParseResult } from "../../core";
 
 function getPointerDefinitions(
   node: ASTNode,

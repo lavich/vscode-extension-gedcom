@@ -3,7 +3,7 @@
   "displayName": "GEDCOM Tools",
   "description": "GEDCOM file language support with real-time validation for VS Code",
   "publisher": "lavich",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Andrei Lobanov",
   "repository": "https://github.com/lavich/vscode-extension-gedcom.git",
   "icon": "images/icon.png",
