@@ -25,18 +25,20 @@ jobs:
       - name: Check if version exists on Marketplace
         id: check-version
         run: |
+          PUBLISHER=$(node -p "require('./package.json').publisher")
+          NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $VERSION"
-          if npx vsce show $VERSION; then
+          if npx vsce show $PUBLISHER.$NAME; then
             echo "version_exists=true" >> $GITHUB_OUTPUT
-            echo "Version $VERSION already exists on Marketplace, skipping patch bump."
+            echo "Version $VERSION already exists on Marketplace, should patch bump."
           else
             echo "version_exists=false" >> $GITHUB_OUTPUT
             echo "Version $VERSION is not published yet."
           fi
 
       - name: Auto bump patch
-        if: steps.check-version.outputs.version_exists == 'false'
+        if: steps.check-version.outputs.version_exists == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
