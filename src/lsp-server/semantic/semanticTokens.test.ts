@@ -15,20 +15,26 @@ describe("buildSemanticTokens", () => {
           {
             kind: "LEVEL",
             value: "0",
-            start: { line: 0, character: 0 },
-            end: { line: 0, character: 1 },
+            range: {
+              start: { line: 0, character: 0 },
+              end: { line: 0, character: 1 },
+            },
           },
           {
             kind: "TAG",
             value: "HEAD",
-            start: { line: 0, character: 2 },
-            end: { line: 0, character: 6 },
+            range: {
+              start: { line: 0, character: 2 },
+              end: { line: 0, character: 6 },
+            },
           },
           {
             kind: "VALUE",
             value: "Some value",
-            start: { line: 0, character: 7 },
-            end: { line: 0, character: 17 },
+            range: {
+              start: { line: 0, character: 7 },
+              end: { line: 0, character: 17 },
+            },
           },
         ],
         range: {
@@ -75,14 +81,18 @@ describe("buildSemanticTokens", () => {
           {
             kind: "LEVEL",
             value: "0",
-            start: { line: 0, character: 0 },
-            end: { line: 0, character: 1 },
+            range: {
+              start: { line: 0, character: 0 },
+              end: { line: 0, character: 1 },
+            },
           },
           {
             kind: "TAG",
             value: "HEAD",
-            start: { line: 0, character: 2 },
-            end: { line: 0, character: 6 },
+            range: {
+              start: { line: 0, character: 2 },
+              end: { line: 0, character: 6 },
+            },
           },
         ],
         range: {
@@ -98,20 +108,26 @@ describe("buildSemanticTokens", () => {
           {
             kind: "LEVEL",
             value: "1",
-            start: { line: 1, character: 0 },
-            end: { line: 1, character: 1 },
+            range: {
+              start: { line: 1, character: 0 },
+              end: { line: 1, character: 1 },
+            },
           },
           {
             kind: "TAG",
             value: "NAME",
-            start: { line: 1, character: 2 },
-            end: { line: 1, character: 6 },
+            range: {
+              start: { line: 1, character: 2 },
+              end: { line: 1, character: 6 },
+            },
           },
           {
             kind: "VALUE",
             value: "John Doe",
-            start: { line: 1, character: 7 },
-            end: { line: 1, character: 15 },
+            range: {
+              start: { line: 1, character: 7 },
+              end: { line: 1, character: 15 },
+            },
           },
         ],
         range: {
@@ -172,8 +188,10 @@ describe("buildSemanticTokens", () => {
           {
             kind: "UNKNOWN",
             value: "???",
-            start: { line: 0, character: 0 },
-            end: { line: 0, character: 3 },
+            range: {
+              start: { line: 0, character: 0 },
+              end: { line: 0, character: 3 },
+            },
           },
         ],
         range: {

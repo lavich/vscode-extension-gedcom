@@ -1,9 +1,6 @@
 import { Location, Position } from "vscode-languageserver";
 
-import {
-  findNodeAtPosition,
-  positionInRange,
-} from "./findNodeAtPosition";
+import { findNodeAtPosition, positionInRange } from "./findNodeAtPosition";
 import { ASTNode, ParseResult } from "../index";
 
 function getPointerDefinitions(
@@ -45,7 +42,7 @@ export function getDefinitionsAtPosition(
   if (!node) return null;
 
   const hoveredToken = node.tokens.find((token) =>
-    positionInRange(pos, { start: token.start, end: token.end })
+    positionInRange(pos, token.range)
   );
   if (!hoveredToken) return null;
 

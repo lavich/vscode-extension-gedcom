@@ -10,9 +10,9 @@ type SemanticToken = {
 };
 
 const tokenToSemanticToken = (token: Token): SemanticToken => ({
-  line: token.start.line,
-  char: token.start.character,
-  length: token.end.character - token.start.character,
+  line: token.range.start.line,
+  char: token.range.start.character,
+  length: token.range.end.character - token.range.start.character,
   tokenType: tokenTypeIndex(token.kind),
   tokenModifiers: modifierMask(token.kind),
 });

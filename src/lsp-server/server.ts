@@ -6,6 +6,7 @@ import {
   Diagnostic,
   TextDocuments,
   TextDocumentSyncKind,
+  DiagnosticSeverity,
 } from "vscode-languageserver";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -89,8 +90,16 @@ export const createServer = (connection: Connection) => {
     cache.set(change.document.uri, parsed);
     const text = change.document.getText();
     const { errors, nodes } = parseGedcom(text);
-    const err = validator(nodes, "");
-    const diagnostics: Diagnostic[] = [...errors, ...err];
+    const errs = validator(nodes, "");
+    const diagnostics: Diagnostic[] = [...errors, ...errs].map((err) => ({
+      ...err,
+      severity:
+        err.level === "error"
+          ? DiagnosticSeverity.Error
+          : err.level === "warning"
+          ? DiagnosticSeverity.Warning
+          : DiagnosticSeverity.Information,
+    }));
     await connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
   });
 
