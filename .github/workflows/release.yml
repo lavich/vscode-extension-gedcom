@@ -40,12 +40,12 @@ jobs:
       - name: Auto bump patch
         if: steps.check-version.outputs.version_exists == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_FOR_PUSH }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          npm version patch -m "chore(release): %s [skip ci]"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          npm version patch -m "chore(release): %s [skip ci]"
-          git push https://${GITHUB_TOKEN}@github.com/${{ github.repository }} --tags
+          git push origin HEAD
 
       - name: Publish extension
         run: npx vsce publish
