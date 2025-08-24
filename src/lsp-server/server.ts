@@ -11,15 +11,12 @@ import {
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
-import {
-  parseGedcom,
-  validator,
-  ParseResult,
-  getDefinitionsAtPosition,
-} from "../core";
-import { levelHint } from "./indent/levelHint";
-import { levelFolding } from "./folding/levelFolding";
-import { legend, semanticTokens } from "./semantic";
+import { parseGedcom, validator, ParseResult } from "../core";
+
+import { levelFolding } from "./utils/folding/levelFolding";
+import { legend, semanticTokens } from "./utils/semantic";
+import { levelIndent } from "./utils/indent/levelIndent";
+import { getDefinitionsAtPosition } from "./utils/getDefinitionsAtPosition";
 
 export const createServer = (connection: Connection) => {
   const documents = new TextDocuments(TextDocument);
@@ -44,7 +41,7 @@ export const createServer = (connection: Connection) => {
   connection.languages.inlayHint.on((params: InlayHintParams): InlayHint[] => {
     const parsed = cache.get(params.textDocument.uri);
     if (!parsed) return [];
-    return levelHint(parsed.nodes);
+    return levelIndent(parsed.nodes);
   });
 
   connection.onFoldingRanges((params): FoldingRange[] => {
@@ -86,20 +83,20 @@ export const createServer = (connection: Connection) => {
   });
 
   documents.onDidChangeContent(async (change) => {
-    const parsed = parseGedcom(change.document.getText());
-    cache.set(change.document.uri, parsed);
-    const text = change.document.getText();
-    const { errors, nodes } = parseGedcom(text);
-    const errs = validator(nodes, "");
-    const diagnostics: Diagnostic[] = [...errors, ...errs].map((err) => ({
-      ...err,
-      severity:
-        err.level === "error"
-          ? DiagnosticSeverity.Error
-          : err.level === "warning"
-          ? DiagnosticSeverity.Warning
-          : DiagnosticSeverity.Information,
-    }));
+    const parseResult = parseGedcom(change.document.getText());
+    cache.set(change.document.uri, parseResult);
+    const errs = validator(parseResult.nodes, "");
+    const diagnostics: Diagnostic[] = [...parseResult.errors, ...errs].map(
+      (err) => ({
+        ...err,
+        severity:
+          err.level === "error"
+            ? DiagnosticSeverity.Error
+            : err.level === "warning"
+            ? DiagnosticSeverity.Warning
+            : DiagnosticSeverity.Information,
+      })
+    );
     await connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
   });
 
