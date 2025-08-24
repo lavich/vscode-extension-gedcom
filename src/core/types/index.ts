@@ -14,8 +14,7 @@ export type TokenKind =
 export interface Token {
   kind: TokenKind;
   value: string;
-  start: Position;
-  end: Position;
+  range: Range;
 }
 
 export interface ASTNode {

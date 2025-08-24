@@ -8,8 +8,8 @@ describe("lexer", () => {
     const { tokens, errors } = lexLine(line, 0);
     expect(errors.length).toBe(0);
     expect(tokens.map((t) => t.kind)).toEqual(["LEVEL", "POINTER", "TAG"]);
-    expect(tokens[0].start.character).toBe(0);
-    expect(tokens[0].end.character).toBe(1);
+    expect(tokens[0].range.start.character).toBe(0);
+    expect(tokens[0].range.end.character).toBe(1);
     expect(tokens[1].value).toBe("@I1@");
   });
 
@@ -33,7 +33,7 @@ describe("lexer", () => {
     expect(errors.length).toBe(0);
     expect(tokens.map((t) => t.kind)).toEqual(["LEVEL", "TAG", "XREF"]);
     expect(tokens[2].value).toBe("@F1@");
-    expect(tokens[2].start.character).toBe(7);
-    expect(tokens[2].end.character).toBe(11);
+    expect(tokens[2].range.start.character).toBe(7);
+    expect(tokens[2].range.end.character).toBe(11);
   });
 });

@@ -20,7 +20,7 @@ function pushError(
 ) {
   const p1 = makePos(line, startCol);
   const p2 = makePos(line, endCol ?? startCol);
-  errors.push({ code, message, range: { start: p1, end: p2 } });
+  errors.push({ code, message, range: { start: p1, end: p2 }, level: "error" });
 }
 
 // --- READERS ---
@@ -41,8 +41,10 @@ function readLevel(
   tokens.push({
     kind: "LEVEL",
     value,
-    start: makePos(lineNo, i),
-    end: makePos(lineNo, i + value.length),
+    range: {
+      start: makePos(lineNo, i),
+      end: makePos(lineNo, i + value.length),
+    },
   });
   return i + value.length;
 }
@@ -71,8 +73,10 @@ function readPointer(
   tokens.push({
     kind: "POINTER",
     value: ptr,
-    start: makePos(lineNo, i),
-    end: makePos(lineNo, i + ptr.length),
+    range: {
+      start: makePos(lineNo, i),
+      end: makePos(lineNo, i + ptr.length),
+    },
   });
   return i + ptr.length;
 }
@@ -93,8 +97,10 @@ function readTag(
   tokens.push({
     kind: "TAG",
     value: tag,
-    start: makePos(lineNo, i),
-    end: makePos(lineNo, i + tag.length),
+    range: {
+      start: makePos(lineNo, i),
+      end: makePos(lineNo, i + tag.length),
+    },
   });
   return i + tag.length;
 }
@@ -114,15 +120,20 @@ function readValue(line: string, i: number, lineNo: number, tokens: Token[]) {
       tokens.push({
         kind: "VALUE",
         value: rawValue.slice(lastIndex, m.index),
-        start: makePos(lineNo, valStart + lastIndex),
-        end: makePos(lineNo, valStart + m.index),
+        range: {
+          start: makePos(lineNo, valStart + lastIndex),
+          end: makePos(lineNo, valStart + m.index),
+        },
       });
     }
     tokens.push({
       kind: "XREF",
       value: m[0],
-      start: makePos(lineNo, valStart + m.index!),
-      end: makePos(lineNo, valStart + m.index! + m[0].length),
+      range: {
+        start: makePos(lineNo, valStart + m.index!),
+        end: makePos(lineNo, valStart + m.index! + m[0].length),
+      }
+
     });
     lastIndex = m.index! + m[0].length;
   }
@@ -131,8 +142,10 @@ function readValue(line: string, i: number, lineNo: number, tokens: Token[]) {
     tokens.push({
       kind: "VALUE",
       value: rawValue.slice(lastIndex),
-      start: makePos(lineNo, valStart + lastIndex),
-      end: makePos(lineNo, line.length),
+      range: {
+        start: makePos(lineNo, valStart + lastIndex),
+        end: makePos(lineNo, line.length),
+      },
     });
   }
 

@@ -6,21 +6,17 @@ import {
   Diagnostic,
   TextDocuments,
   TextDocumentSyncKind,
-  Location,
+  DiagnosticSeverity,
 } from "vscode-languageserver";
 import { InitializeResult, InlayHint } from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
-import {
-  parseGedcom,
-  levelHint,
-  levelFolding,
-  validator,
-  findNodeAtPosition,
-  semanticTokens,
-  legend,
-  ParseResult,
-} from "../core";
+import { parseGedcom, validator, ParseResult } from "../core";
+
+import { levelFolding } from "./utils/folding/levelFolding";
+import { legend, semanticTokens } from "./utils/semantic";
+import { levelIndent } from "./utils/indent/levelIndent";
+import { getDefinitionsAtPosition } from "./utils/getDefinitionsAtPosition";
 
 export const createServer = (connection: Connection) => {
   const documents = new TextDocuments(TextDocument);
@@ -45,7 +41,7 @@ export const createServer = (connection: Connection) => {
   connection.languages.inlayHint.on((params: InlayHintParams): InlayHint[] => {
     const parsed = cache.get(params.textDocument.uri);
     if (!parsed) return [];
-    return levelHint(parsed.nodes);
+    return levelIndent(parsed.nodes);
   });
 
   connection.onFoldingRanges((params): FoldingRange[] => {
@@ -79,35 +75,28 @@ export const createServer = (connection: Connection) => {
     const parseResult = cache.get(params.textDocument.uri);
     if (!parseResult) return null;
 
-    const node = findNodeAtPosition(parseResult.nodes, params.position);
-    if (!node) return null;
-
-    if (node.pointer) {
-      return parseResult.xrefsIndex
-        .get(node.pointer)
-        ?.filter(Boolean)
-        .flatMap((nodeSet) => nodeSet)
-        .filter(Boolean)
-        .map((node) => Location.create(params.textDocument.uri, node!.range));
-    }
-
-    if (node.xrefs?.length) {
-      return node.xrefs
-        .map((xref) => parseResult.pointerIndex.get(xref))
-        .filter(Boolean)
-        .map((node) => Location.create(params.textDocument.uri, node!.range));
-    }
-
-    return null;
+    return getDefinitionsAtPosition(
+      parseResult,
+      params.position,
+      params.textDocument.uri
+    );
   });
 
   documents.onDidChangeContent(async (change) => {
-    const parsed = parseGedcom(change.document.getText());
-    cache.set(change.document.uri, parsed);
-    const text = change.document.getText();
-    const { errors, nodes } = parseGedcom(text);
-    const err = validator(nodes, "");
-    const diagnostics: Diagnostic[] = [...errors, ...err];
+    const parseResult = parseGedcom(change.document.getText());
+    cache.set(change.document.uri, parseResult);
+    const errs = validator(parseResult.nodes, "");
+    const diagnostics: Diagnostic[] = [...parseResult.errors, ...errs].map(
+      (err) => ({
+        ...err,
+        severity:
+          err.level === "error"
+            ? DiagnosticSeverity.Error
+            : err.level === "warning"
+            ? DiagnosticSeverity.Warning
+            : DiagnosticSeverity.Information,
+      })
+    );
     await connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
   });
 

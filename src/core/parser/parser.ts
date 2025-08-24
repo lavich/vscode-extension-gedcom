@@ -1,9 +1,8 @@
-// parser.ts
 import { lex } from "./lexer";
 import type { ASTNode, ValidationError, Range, Token } from "../types";
 
 function rangeFromTokens(first: Token, last: Token): Range {
-  return { start: first.start, end: last.end };
+  return { start: first.range.start, end: last.range.end };
 }
 
 const fixRangeEndForParent = (node: ASTNode) => {
@@ -25,6 +24,7 @@ function attachNode(
       message: `Invalid level jump: from ${stack[stack.length - 1].level} to ${
         node.level
       }`,
+      level: "error",
       range: node.range,
     });
   }
@@ -64,52 +64,51 @@ export function parseGedcom(text: string): ParseResult {
   const errors: ValidationError[] = [...lexErrors];
 
   for (const { tokens } of perLine) {
-    if (tokens.length === 0) continue; // пустая строка → пропускаем
+    if (tokens.length === 0) continue;
 
-    const levelTok = tokens.find((t) => t.kind === "LEVEL");
-    const tagTok = tokens.find((t) => t.kind === "TAG");
-    const ptrTok = tokens.find((t) => t.kind === "POINTER");
-    const valueToks = tokens.filter((t) => t.kind === "VALUE");
-    const xrefToks = tokens.filter((t) => t.kind === "XREF");
+    const levelToken = tokens.find((t) => t.kind === "LEVEL");
+    const tagToken = tokens.find((t) => t.kind === "TAG");
+    const pointerToken = tokens.find((t) => t.kind === "POINTER");
+    const valueTokens = tokens.filter((t) => t.kind === "VALUE");
+    const xrefTokens = tokens.filter((t) => t.kind === "XREF");
 
-    if (!levelTok || !tagTok) {
-      // неполная строка, lexer должен был уже дать ошибку
+    if (!levelToken || !tagToken) {
       continue;
     }
 
-    const level = parseInt(levelTok.value, 10);
+    const level = parseInt(levelToken.value, 10);
     const lastTok = tokens[tokens.length - 1];
 
     const node: ASTNode = {
       tokens,
-      range: rangeFromTokens(levelTok, lastTok),
+      range: rangeFromTokens(levelToken, lastTok),
       level,
-      tag: tagTok.value,
-      pointer: ptrTok?.value,
-      values: valueToks.map((t) => t.value),
-      xrefs: xrefToks.map((t) => t.value),
+      tag: tagToken.value,
+      pointer: pointerToken?.value,
+      values: valueTokens.map((t) => t.value),
+      xrefs: xrefTokens.map((t) => t.value),
       children: [],
       parent: undefined,
     };
 
     attachNode(stack, nodes, node, errors);
 
-    // индексируем pointer
-    if (node.pointer) {
-      if (pointerIndex.has(node.pointer)) {
+    if (pointerToken) {
+      if (pointerIndex.has(pointerToken.value)) {
         errors.push({
           code: "PAR002",
           message: `Duplicate pointer ${node.pointer}`,
-          range: node.range,
+          level: "error",
+          range: pointerToken.range,
         });
       } else {
-        pointerIndex.set(node.pointer, node);
+        pointerIndex.set(pointerToken.value, node);
       }
     }
 
-    node.xrefs?.forEach((xref) => {
-      const nodes = xrefsIndex.get(xref) || [];
-      xrefsIndex.set(xref, [...nodes, node]);
+    xrefTokens?.forEach((xref) => {
+      const nodes = xrefsIndex.get(xref.value) || [];
+      xrefsIndex.set(xref.value, [...nodes, node]);
     });
   }
 

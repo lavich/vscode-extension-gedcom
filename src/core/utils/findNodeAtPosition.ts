@@ -1,6 +1,6 @@
-import { ASTNode, Position } from "../types";
+import { ASTNode, Position } from "../index";
 
-function positionInRange(
+export function positionInRange(
   pos: Position,
   { start, end }: { start: Position; end: Position }
 ): boolean {

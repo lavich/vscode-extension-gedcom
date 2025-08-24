@@ -23,10 +23,10 @@ function parseCardinality(str: string): { min: number; max: number } | null {
 }
 
 function foundVersion(nodes: ASTNode[]): number {
-  const head = nodes.find(n => n.tag === "HEAD");
-  const vers = head?.children.find(n => n.tag === "GEDC")
-    ?.children.find(n => n.tag === "VERS")
-    ?.values?.[0];
+  const head = nodes.find((n) => n.tag === "HEAD");
+  const vers = head?.children
+    .find((n) => n.tag === "GEDC")
+    ?.children.find((n) => n.tag === "VERS")?.values?.[0];
   return parseFloat(vers ?? "5.5.1");
 }
 
@@ -60,13 +60,15 @@ export function validator(
 
   for (const node of nodes) {
     const tag = GedcomTag(node.tag);
+    const tagToken = node.tokens.find((token) => token.kind === "TAG");
     const rule = rules.get(tag);
 
     if (!rule) {
       errors.push({
         code: ValidationErrorCode.UnknownTag,
         message: `Unknown tag ${tag} in parent ${parentTag}`,
-        range: node.range,
+        range: tagToken?.range || node.range,
+        level: "warning",
       });
       continue;
     }
@@ -75,7 +77,8 @@ export function validator(
       errors.push({
         code: ValidationErrorCode.ManyOccurrences,
         message: `Too many occurrences of ${tag} in parent ${parentTag}`,
-        range: node.range,
+        range: tagToken?.range || node.range,
+        level: "error",
       });
     } else {
       rule.max--;
@@ -91,7 +94,8 @@ export function validator(
           errors.push({
             code: ValidationErrorCode.IncorrectValue,
             message: `Incorrect value ${node.values?.[0]} for ${tag}`,
-            range: node.range,
+            range: tagToken?.range || node.range,
+            level: "error",
           });
         }
       } else if (rule.payload.type === "https://gedcom.io/terms/v7/type-Enum") {
@@ -102,7 +106,8 @@ export function validator(
           errors.push({
             code: ValidationErrorCode.ShouldBeSetValue,
             message: `Value for ${tag} should be in set [${values}]`,
-            range: node.range,
+            range: tagToken?.range || node.range,
+            level: "error",
           });
         }
       } else if (rule.payload.type === "pointer") {
@@ -110,14 +115,16 @@ export function validator(
           errors.push({
             code: ValidationErrorCode.MissingRef,
             message: `Missing ref for ${tag}`,
-            range: node.range,
+            range: tagToken?.range || node.range,
+            level: "error",
           });
         }
       } else if (!node.values?.length && !node.xrefs?.length) {
         errors.push({
           code: ValidationErrorCode.MissingValue,
           message: `Missing value for ${tag}`,
-          range: node.range,
+          range: tagToken?.range || node.range,
+          level: "error",
         });
       }
     }
@@ -129,11 +136,12 @@ export function validator(
     if (rule.min > 0) {
       errors.push({
         code: ValidationErrorCode.MissingTag,
-        message: `Missing required tag ${tag} in parent ${parentTag}`,
-        range: nodes[0]?.range ?? {
-          start: { line: 0, col: 0 },
-          end: { line: 0, col: 0 },
+        message: `Missing required tag ${tag} in ${parentTag || "root"}`,
+        range: nodes[0]?.parent?.range ?? {
+          start: { line: 0, character: 0 },
+          end: { line: 0, character: 0 },
         },
+        level: "error",
       });
     }
   }

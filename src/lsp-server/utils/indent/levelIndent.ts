@@ -1,19 +1,12 @@
-import { ASTNode } from "../types";
+import type { InlayHint } from "vscode-languageserver-protocol";
 
-type InlayHint = {
-  position: {
-    line: number;
-    character: number;
-  };
-  label: string;
-  paddingRight: boolean;
-};
+import { ASTNode } from "../../../core";
 
 const INDENT = "  ";
 
-export const levelHint = (nodes: ASTNode[]): InlayHint[] => {
+export const levelIndent = (nodes: ASTNode[]): InlayHint[] => {
   return nodes.flatMap((node) => {
-    const hint = levelHint(node.children);
+    const hint = levelIndent(node.children);
     if (node.level > 0) {
       const indent = INDENT.repeat(node.level);
       hint.push({
