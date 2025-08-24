@@ -1,7 +1,8 @@
 import { ASTNode, ValidationError } from "../index";
-import { GedcomTag, GedcomType, Payload, Scheme } from "./schema-types";
+import { GedcomTag, GedcomType, Payload, GedcomScheme } from "./schema-types";
 import g7validationJson from "./g7validation.json";
 import g551validationJson from "./g551validation.json";
+import { getGedcomVersion } from "./getGedcomVersion";
 
 enum ValidationErrorCode {
   UnknownTag = "VAL001",
@@ -22,22 +23,14 @@ function parseCardinality(str: string): { min: number; max: number } | null {
   return { min, max };
 }
 
-function foundVersion(nodes: ASTNode[]): number {
-  const head = nodes.find((n) => n.tag === "HEAD");
-  const vers = head?.children
-    .find((n) => n.tag === "GEDC")
-    ?.children.find((n) => n.tag === "VERS")?.values?.[0];
-  return parseFloat(vers ?? "5.5.1");
-}
-
 export function validator(
   nodes: ASTNode[],
   parentType: GedcomType | string = "",
   _version?: number
 ): ValidationError[] {
-  const version = _version || foundVersion(nodes);
+  const version = _version || getGedcomVersion(nodes);
 
-  const scheme: Scheme = version < 7 ? g551validationJson : g7validationJson;
+  const scheme: GedcomScheme = version < 7 ? g551validationJson : g7validationJson;
 
   const substructure = scheme.substructure[GedcomType(parentType)];
   if (!substructure) return [];

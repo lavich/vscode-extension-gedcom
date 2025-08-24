@@ -5,7 +5,7 @@ export const GedcomTag = make<GedcomTag>();
 export type GedcomType = Brand<string, "GedcomType">;
 export const GedcomType = make<GedcomType>();
 
-export interface Scheme {
+export interface GedcomScheme {
   calendar: Record<GedcomTag, Calendar>;
   label: Record<GedcomType, Label>;
   payload: Record<GedcomType, Payload>;
