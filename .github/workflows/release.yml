@@ -29,25 +29,18 @@ jobs:
           NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $VERSION"
-          if npx vsce show $PUBLISHER.$NAME; then
+          PUBLISHED_VERSION=$(npx vsce show $PUBLISHER.$NAME | grep Version: | awk '{print $2}')
+          echo "Published version: $PUBLISHED_VERSION"
+          if [ "$VERSION" = "$PUBLISHED_VERSION" ]; then
             echo "version_exists=true" >> $GITHUB_OUTPUT
-            echo "Version $VERSION already exists on Marketplace, should patch bump."
+            echo "Version $VERSION already exists on Marketplace"
           else
             echo "version_exists=false" >> $GITHUB_OUTPUT
             echo "Version $VERSION is not published yet."
           fi
 
-      - name: Auto bump patch
-        if: steps.check-version.outputs.version_exists == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          npm version patch -m "chore(release): %s [skip ci]"
-          git push origin HEAD
-
       - name: Publish extension
+        if: steps.check-version.outputs.version_exists == 'false'
         run: npx vsce publish
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
