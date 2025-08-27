@@ -2,7 +2,7 @@ import { GedcomLexer } from "./lexer";
 import { parser } from "./parser";
 import { AstVisitor } from "./AstVisitor";
 
-export const astGedcomBuilder = (text: string) => {
+export const astBuilder = (text: string) => {
   const lexingResult = GedcomLexer.tokenize(text);
   parser.input = lexingResult.tokens;
   const cst = parser.root();

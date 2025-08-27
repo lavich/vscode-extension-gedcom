@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { astGedcomBuilder } from "./astGedcomBuilder";
+import { astBuilder } from "./astBuilder";
 
 describe("visitor", () => {
   it("build tree", () => {
@@ -176,7 +176,7 @@ describe("visitor", () => {
 3 TIME 15:13:45
 0 TRLR`;
 
-    const { ast, errors } = astGedcomBuilder(SAMPLE);
+    const { ast, errors } = astBuilder(SAMPLE);
 
     expect(errors.length).toBe(0);
     expect(ast.length).toBe(17);

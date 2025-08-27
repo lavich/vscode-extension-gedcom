@@ -1,6 +1,7 @@
 import { CstNode } from "chevrotain";
 import { CstElement, IToken } from "@chevrotain/types";
 import { parser } from "./parser";
+import { TokenNames } from "./lexer";
 
 const BaseGedcomVisitor = parser.getBaseCstVisitorConstructor();
 
@@ -14,14 +15,10 @@ interface ASTToken {
   value: string;
 }
 
-interface GedcomNode {
-  line?: number;
-  level?: ASTToken;
-  tag?: ASTToken;
-  pointer?: ASTToken;
-  xref?: ASTToken;
-  value?: ASTToken;
-  children: GedcomNode[];
+export interface ASTNode {
+  line: number;
+  tokens: Partial<Record<TokenNames, ASTToken>>;
+  children: ASTNode[];
 }
 
 const isCstNode = (v: CstElement): v is CstNode => "name" in v;
@@ -33,33 +30,25 @@ export class AstVisitor extends BaseGedcomVisitor {
     this.validateVisitor();
   }
 
-  root(ctx: CstNode): GedcomNode[] {
-    const nodes: GedcomNode[] = [];
+  root(ctx: CstNode): ASTNode[] {
+    const nodes: ASTNode[] = [];
     if (!ctx.children.line) return nodes;
-    for (const lineCst of ctx.children.line) {
-      if (isCstNode(lineCst)) nodes.push(this.line(lineCst));
-    }
+    ctx.children.line.forEach((lineCst, index) => {
+      if (isCstNode(lineCst)) nodes.push(this.line(lineCst, index));
+    });
     return this.buildHierarchy(nodes);
   }
 
-  line({ children }: CstNode): GedcomNode {
+  line({ children }: CstNode, line: number): ASTNode {
+    const tokens: ASTNode["tokens"] = {};
+    Object.keys(children).map((tokenName) => {
+      tokens[tokenName as TokenNames] = this.getFirstToken(children[tokenName]);
+    });
     return {
-      line: this.getLine(children.LEVEL),
-      level: this.getFirstToken(children.LEVEL),
-      pointer: this.getFirstToken(children.POINTER),
-      tag:
-        this.getFirstToken(children.TAG) ||
-        this.getFirstToken(children.TagWithoutPointer),
-      xref: this.getFirstToken(children.XREF),
-      value: this.getFirstToken(children.VALUE),
+      line,
+      tokens,
       children: [],
     };
-  }
-
-  getLine(elements?: CstElement[]): number | undefined {
-    const token = elements?.find((element) => isIToken(element));
-    if (!token) return undefined;
-    return token.startLine;
   }
 
   getFirstToken(elements?: CstElement[]): ASTToken | undefined {
@@ -75,16 +64,17 @@ export class AstVisitor extends BaseGedcomVisitor {
     };
   }
 
-  buildHierarchy(nodes: GedcomNode[]): GedcomNode[] {
-    const stack: GedcomNode[] = [];
-    const result: GedcomNode[] = [];
+  buildHierarchy(nodes: ASTNode[]): ASTNode[] {
+    const stack: ASTNode[] = [];
+    const result: ASTNode[] = [];
 
     for (const node of nodes) {
-      const level = node.level?.value ? parseInt(node.level?.value) : 0;
+      const levelValue = node.tokens.LEVEL?.value;
+      const level = levelValue ? parseInt(levelValue) : 0;
 
       while (
         stack.length > 0 &&
-        parseInt(stack[stack.length - 1].level?.value || "0") >= level
+        parseInt(stack[stack.length - 1].tokens.LEVEL?.value || "0") >= level
       ) {
         stack.pop();
       }

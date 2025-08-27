@@ -1,7 +1,7 @@
 import { createToken, Lexer } from "chevrotain";
 import { IMultiModeLexerDefinition } from "@chevrotain/types";
 
-enum TokenNames {
+export enum TokenNames {
   LEVEL = "LEVEL",
   POINTER = "POINTER",
   TAG = "TAG",
@@ -9,7 +9,6 @@ enum TokenNames {
   VALUE = "VALUE",
 }
 
-// --- Служебные ---
 const WhiteSpace = createToken({
   name: "WhiteSpace",
   pattern: /[ \t]+/,
@@ -38,18 +37,10 @@ export const Pointer = createToken({
   push_mode: "hasPointer",
 });
 
-export const TagWithoutPointer = createToken({
+export const Tag = createToken({
   name: TokenNames.TAG,
   pattern: /[A-Z0-9_]+/,
   start_chars_hint: [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"],
-  push_mode: "hasNotPointer",
-});
-
-export const TagWithPointer = createToken({
-  name: TokenNames.TAG,
-  pattern: /[A-Z0-9_]+/,
-  start_chars_hint: [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"],
-  pop_mode: true,
 });
 
 export const Xref = createToken({
@@ -69,8 +60,8 @@ export const Value = createToken({
 export const gedcomLexerDefinition: IMultiModeLexerDefinition = {
   defaultMode: "main",
   modes: {
-    main: [Newline, WhiteSpace, Level, Pointer, TagWithoutPointer],
-    hasPointer: [WhiteSpace, TagWithPointer],
+    main: [Newline, WhiteSpace, Level, Pointer, {...Tag, PUSH_MODE: "hasNotPointer"}],
+    hasPointer: [WhiteSpace, {...Tag, PUSH_MODE: "main"}],
     hasNotPointer: [Newline, WhiteSpace, Xref, Value],
   },
 };
@@ -78,8 +69,7 @@ export const gedcomLexerDefinition: IMultiModeLexerDefinition = {
 export const tokens = {
   Level,
   Pointer,
-  TagWithPointer,
-  TagWithoutPointer,
+  Tag,
   Xref,
   Value,
 };

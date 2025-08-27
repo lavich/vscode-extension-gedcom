@@ -20,12 +20,12 @@ export class GedcomParser extends CstParser {
         {
           ALT: () => {
             this.CONSUME(tokens.Pointer);
-            this.CONSUME1(tokens.TagWithPointer);
+            this.CONSUME1(tokens.Tag);
           },
         },
         {
           ALT: () => {
-            this.CONSUME2(tokens.TagWithoutPointer);
+            this.CONSUME2(tokens.Tag);
             this.OPTION2(() => {
               this.CONSUME(tokens.Xref);
             });
