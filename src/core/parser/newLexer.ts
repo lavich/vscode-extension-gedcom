@@ -33,7 +33,7 @@ export const Level = createToken({
 
 export const Pointer = createToken({
   name: TokenNames.POINTER,
-  pattern: /@[A-Za-z0-9]+@/,
+  pattern: /@[A-Za-z0-9_]+@/,
   start_chars_hint: ["@"],
   push_mode: "hasPointer",
 });
@@ -54,7 +54,7 @@ export const TagWithPointer = createToken({
 
 export const Xref = createToken({
   name: TokenNames.XREF,
-  pattern: /@[A-Za-z0-9]+@/,
+  pattern: /@[A-Za-z0-9_]+@/,
   start_chars_hint: ["@"],
   pop_mode: true,
 });

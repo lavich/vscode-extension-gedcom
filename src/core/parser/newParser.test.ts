@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseGedcom } from "./newParser";
+import { parser } from "./newParser";
+import { GedcomLexer } from "./newLexer";
 
 describe("parser", () => {
   it("parse SAMPLE", () => {
@@ -11,7 +12,8 @@ describe("parser", () => {
 0 @I2@ INDI
 3 FAM @i2@
 1 NAME Jane /Doe/`;
-    const { parser, lexingResult } = parseGedcom(SAMPLE);
+    const lexingResult = GedcomLexer.tokenize(SAMPLE);
+    parser.input = lexingResult.tokens;
 
     expect(parser.errors.length).toBe(0);
     expect(lexingResult.errors.length).toBe(0);

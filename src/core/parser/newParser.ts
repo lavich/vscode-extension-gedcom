@@ -1,7 +1,7 @@
 import { CstNode, CstParser, ParserMethod } from "chevrotain";
-import { GedcomLexer, gedcomLexerDefinition, tokens } from "./newLexer";
+import { gedcomLexerDefinition, tokens } from "./newLexer";
 
-class GedcomParser extends CstParser {
+export class GedcomParser extends CstParser {
   root!: ParserMethod<[], CstNode>;
   line!: ParserMethod<[], CstNode>;
 
@@ -41,12 +41,4 @@ class GedcomParser extends CstParser {
   }
 }
 
-const parser = new GedcomParser();
-
-export function parseGedcom(text: string) {
-  const lexingResult = GedcomLexer.tokenize(text);
-  parser.input = lexingResult.tokens;
-  const result = parser.root();
-
-  return { parser, lexingResult, result };
-}
+export const parser = new GedcomParser();
