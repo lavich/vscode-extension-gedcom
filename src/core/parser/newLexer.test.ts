@@ -23,7 +23,9 @@ describe("lexer", () => {
   });
 
   it("parse level, pointer, tag", () => {
-    const { tokens, errors } = GedcomLexer.tokenize("1 @POINTER@ BIRT \n1 @POINTER@ BIRT");
+    const { tokens, errors } = GedcomLexer.tokenize(
+      "1 @POINTER@ BIRT \n1 @POINTER@ BIRT"
+    );
     expect(errors.length).toBe(0);
     expect(tokens.length).toBe(6);
   });
