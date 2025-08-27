@@ -1,7 +1,7 @@
 import {describe, expect, it} from "vitest";
-import {parser} from "./newParser";
+import {parser} from "./parser";
 import {AstVisitor} from "./AstVisitor";
-import {GedcomLexer} from "./newLexer";
+import {GedcomLexer} from "./lexer";
 
 describe("visitor", () => {
   it("build tree", () => {

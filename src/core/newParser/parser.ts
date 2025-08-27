@@ -1,5 +1,5 @@
 import { CstNode, CstParser, ParserMethod } from "chevrotain";
-import { gedcomLexerDefinition, tokens } from "./newLexer";
+import { gedcomLexerDefinition, tokens } from "./lexer";
 
 export class GedcomParser extends CstParser {
   root!: ParserMethod<[], CstNode>;

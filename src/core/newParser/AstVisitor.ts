@@ -1,6 +1,6 @@
 import { CstNode } from "chevrotain";
-import { parser } from "./newParser";
 import { CstElement, IToken } from "@chevrotain/types";
+import { parser } from "./parser";
 
 const BaseGedcomVisitor = parser.getBaseCstVisitorConstructor();
 

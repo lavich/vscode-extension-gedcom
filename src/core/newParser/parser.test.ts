@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parser } from "./newParser";
-import { GedcomLexer } from "./newLexer";
+import { parser } from "./parser";
+import { GedcomLexer } from "./lexer";
 
 describe("parser", () => {
   it("parse SAMPLE", () => {

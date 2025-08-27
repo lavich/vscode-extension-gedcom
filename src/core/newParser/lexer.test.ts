@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { GedcomLexer } from "./newLexer";
+import { GedcomLexer } from "./lexer";
 
 describe("lexer", () => {
   it("parse level and tag", () => {
