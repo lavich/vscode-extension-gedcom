@@ -1,7 +1,7 @@
 import { ASTNode, ValidationError } from "../index";
 import { GedcomTag, GedcomType, Payload, GedcomScheme } from "./schema-types";
-import g7validationJson from "./g7validation.json";
-import g551validationJson from "./g551validation.json";
+import g7validationJson from "../schemes/g7validation.json";
+import g551validationJson from "../schemes/g551validation.json";
 import { getGedcomVersion } from "./getGedcomVersion";
 
 enum ValidationErrorCode {

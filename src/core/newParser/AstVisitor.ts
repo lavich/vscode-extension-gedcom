@@ -18,6 +18,7 @@ interface ASTToken {
 export interface ASTNode {
   line: number;
   tokens: Partial<Record<TokenNames, ASTToken>>;
+  parent?: ASTNode;
   children: ASTNode[];
 }
 
@@ -82,7 +83,9 @@ export class AstVisitor extends BaseGedcomVisitor {
       if (stack.length === 0) {
         result.push(node);
       } else {
-        stack[stack.length - 1].children.push(node);
+        const parent = stack[stack.length - 1];
+        parent.children.push(node);
+        node.parent = parent;
       }
 
       stack.push(node);

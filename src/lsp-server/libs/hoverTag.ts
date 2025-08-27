@@ -1,8 +1,8 @@
 import { ASTNode, findNodeAtPosition, getGedcomVersion } from "../../core";
 import { Hover, MarkupKind, Position } from "vscode-languageserver";
 import { getDefinition } from "../../core/validator/getDefinition";
-import g7validationJson from "../../core/validator/g7validation.json";
-import g551validationJson from "../../core/validator/g551validation.json";
+import g7validationJson from "../../core/schemes/g7validation.json";
+import g551validationJson from "../../core/schemes/g551validation.json";
 import { GedcomScheme } from "../../core/validator/schema-types";
 
 export const hoverTag = (

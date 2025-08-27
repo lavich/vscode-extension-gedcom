@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { parseGedcom } from "../.";
 import { getDefinition } from "./getDefinition";
-import g7validationJson from "./g7validation.json";
+import g7validationJson from "../schemes/g7validation.json";
 
 describe("getDefinition", () => {
   test("positive test", async () => {
